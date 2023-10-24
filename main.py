@@ -59,11 +59,10 @@ def get_pokemon_stats(pokemon_data: dict) -> dict:
 
     return stats_to_return
 
-# TODO
 
-
+# TODO fix ability function
 def get_pokemon_abilities(pokemon_data: dict) -> dict:
-    """Returns the pokemon's stats from the input dictionary"""
+    """Returns the pokemon's abilities from the input dictionary"""
 
     if not isinstance(pokemon_data, dict):
         raise TypeError("Error: Pokemon data is not in the correct format!")
@@ -79,15 +78,27 @@ def get_pokemon_abilities(pokemon_data: dict) -> dict:
     for ability in pokemon_abilities:
 
         ability_url = ability["ability"]["url"]
+
         try:
             r = requests.get(ability_url)
+
         except (ConnectionAbortedError, ConnectionError, ConnectionRefusedError) as Err:
             Err("Error: Unsuccessful connection when attempting to get ability information!")
 
         ability_data = r.json()
 
-        print(ability_data)
         # TODO filter for english
+        ability_effect_changes = [x for x in ability_data["effect_changes"]
+                                  if x["version_group"]["name"].lower().strip() == "diamond-pearl"]
+
+        ability_effect_entry = [x["effect"] for x in ability_data["effect_entries"]
+                                if x["language"]["name"].lower().strip() == "en"][0]
+
+        ability_flavor_text_entry = [x["flavor_text"] for x in ability_data["flavor_text_entries"]
+                                     if x["language"]["name"].lower().strip() == "en"
+                                     and x["version_group"]["name"].lower().strip() == "diamond-pearl"][0]
+
+        print(ability_effect_changes)
 
     return abilities_to_return
 
