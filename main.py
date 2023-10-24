@@ -59,36 +59,9 @@ def get_pokemon_stats(pokemon_data: dict) -> dict:
 
     return stats_to_return
 
-
-def get_pokemon_stats(pokemon_data: dict) -> dict:
-    """Returns the pokemon's abilities from the input dictionary"""
-
-    if not isinstance(pokemon_data, dict):
-        raise TypeError("Error: Pokemon data is not in the correct format!")
-
-    if "stats" not in pokemon_data:
-        raise ValueError(
-            "Error: Pokemon data does not contain 'stats' section!")
-
-    pokemon_stats = pokemon_data["stats"]
-
-    stats_to_return = {}
-
-    for stat in pokemon_stats:
-
-        stat_name = stat["stat"]["name"]
-        stat_value = stat["base_stat"]
-
-        if stat_value <= 0:
-            raise ValueError(
-                f"Error: Pokemon stat ({stat_name}) cannot be equal to or less than 0!")
-
-        stats_to_return[stat_name] = stat_value
-
-    return stats_to_return
-
-
 # TODO
+
+
 def get_pokemon_abilities(pokemon_data: dict) -> dict:
     """Returns the pokemon's stats from the input dictionary"""
 
