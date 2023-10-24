@@ -19,6 +19,30 @@ def get_pokemon(pokemon_name: str) -> dict:
     return pokemon_data
 
 
+def get_pokemon_dimensions(pokemon_data: dict) -> dict:
+    """Returns pokemon dimensions from input data"""
+
+    if not isinstance(pokemon_data, dict):
+        raise TypeError("Error: Pokemon data is not in the correct format!")
+
+    if "weight" not in pokemon_data:
+        raise KeyError("Error: Pokemon data does not contain 'weight' value!")
+
+    if "height" not in pokemon_data:
+        raise KeyError("Error: Pokemon data does not contain 'height' value!")
+
+    if pokemon_data["weight"] <= 0 or pokemon_data["height"] <= 0:
+        raise ValueError(
+            "Error: Pokemon cannot have a negative weight or height!")
+
+    dimensions_to_return = {}
+
+    dimensions_to_return["weight"] = pokemon_data["weight"]
+    dimensions_to_return["height"] = pokemon_data["height"]
+
+    return dimensions_to_return
+
+
 def get_pokemon_moves(pokemon_data: dict) -> dict:
     """Returns the pokemon's moves from the input dictionary"""
 

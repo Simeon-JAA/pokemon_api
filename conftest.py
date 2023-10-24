@@ -17,6 +17,8 @@ def fake_pokemon_pikachu() -> dict:
     """Returns a fake pikachu pokemon"""
 
     pokemon = {"name": "pikachu",
+               "height": 5,
+               "weight": 10,
                "stats": [
                    {
                        "base_stat": 35,
@@ -76,6 +78,8 @@ def fake_pokemon_pikachu_bad_stats() -> dict:
     """Returns a fake pikachu pokemon with bad stats"""
 
     pokemon = {"name": "pikachu",
+               "height": -5,
+               "weight": -500,
                "stats": [
                    {
                        "base_stat": -10,
