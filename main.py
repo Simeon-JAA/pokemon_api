@@ -11,10 +11,15 @@ def get_pokemon(pokemon_name: str) -> dict:
 
     try:
         r = requests.get(f"https://pokeapi.co/api/v2/pokemon/{pokemon_name}")
-        pokemon_data = r.json()
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
-        Err("Error: Connection unsuccessful!")
+        Err("Error: Connection to API unsuccessful!")
+
+    if r.status_code == 404:
+        raise Exception(
+            f"Error: {pokemon_name} was not found in API!")
+
+    pokemon_data = r.json()
 
     return pokemon_data
 
@@ -43,6 +48,19 @@ def get_pokemon_dimensions(pokemon_data: dict) -> dict:
     return dimensions_to_return
 
 
+def check_pokemon_move_version_group(version_group: list, version_name: str, level: int = 0) -> bool:
+    """Returns true if the version_name input is in the version_group input"""
+
+    if not isinstance(version_group, list):
+        raise TypeError("Error: Pokemon version group is not a list!")
+
+    for version in version_group:
+        if version["level_learned_at"] == level and version["version_group"]["name"].lower() == version_name.lower().strip():
+            return True
+
+    return False
+
+
 def get_pokemon_moves(pokemon_data: dict) -> dict:
     """Returns the pokemon's moves from the input dictionary"""
 
@@ -50,10 +68,15 @@ def get_pokemon_moves(pokemon_data: dict) -> dict:
         raise TypeError("Error: Pokemon data is not in the correct format!")
 
     if "moves" not in pokemon_data:
-        raise ValueError(
-            "Error: Pokemon data does not contain 'moves' section!")
+        raise KeyError("Error: Pokemon data does not contain any moves!")
 
-    return pokemon_data["moves"]
+    moves_to_return = {}
+
+    for move in pokemon_data["moves"]:
+        if check_pokemon_move_version_group(move["version_group_details"], "diamond-pearl"):
+            moves_to_return[move["move"]["name"]] = move["move"]["url"]
+
+    return moves_to_return
 
 
 def get_pokemon_stats(pokemon_data: dict) -> dict:
@@ -131,12 +154,15 @@ if __name__ == "__main__":
 
     print("Search for pokemon")
 
-    selected_pokemon = input("Input pokemon:")
+    while True:
 
-    pokemon_data = get_pokemon(selected_pokemon)
+        selected_pokemon = input("Input pokemon:")
 
-    # pokemon_stats = get_pokemon_stats(pokemon_data)
-    pokemon_abilities = get_pokemon_abilities(pokemon_data)
+        pokemon_data = get_pokemon(selected_pokemon)
 
-    # print(pokemon_stats)
-    print(pokemon_abilities)
+        pokemon_stats = get_pokemon_stats(pokemon_data)
+        pokemon_moves = get_pokemon_moves(pokemon_data)
+
+        # pokemon_abilities = get_pokemon_abilities(pokemon_data)
+
+        print(pokemon_moves)
