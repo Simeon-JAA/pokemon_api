@@ -40,6 +40,24 @@ def get_all_pokemon_names() -> list:
     return pokemon_names
 
 
+def get_pokemon_data(pokemon_name: str, pokemon_names_available: list[str]) -> dict:
+    """Returns pokemon data from API"""
+
+    if not isinstance(pokemon_names_available, list | tuple | set):
+        raise TypeError(
+            "Error: Cannot iterate through list of names provided!")
+
+    if pokemon_name.lower() not in pokemon_names_available:
+        raise ValueError(
+            "Error: Pokemon not found in the list of names provided!")
+
+    url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
+
+    pokemon_data = api_request_data(url)
+
+    return pokemon_data
+
+
 class Pokemon():
     def __init__(self, name: str) -> None:
         self._name = name
@@ -52,7 +70,7 @@ class Pokemon():
 class Pokemon_Team():
     """Class for creating a team of pokemon"""
 
-    def __init__(self, team_name: str,) -> None:
+    def __init__(self, team_name: str) -> None:
 
         # TODO figure out how to move edge cases into setter
         if not isinstance(team_name, str):
@@ -117,4 +135,12 @@ if __name__ == "__main__":
 
     pokemon_names = get_all_pokemon_names()
 
-    print(pokemon_names)
+    while True:
+
+        user_pokemon_name = input("Please chose your pokemon: ").lower()
+
+        if user_pokemon_name not in pokemon_names:
+            print("Not found")
+
+        else:
+            print("Found")
