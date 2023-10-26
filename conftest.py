@@ -128,3 +128,11 @@ def fake_pokemon_pikachu_bad_stats() -> dict:
                }
 
     return pokemon
+
+
+@pytest.fixture
+def list_of_pokemon_names() -> list[str]:
+    """Returns list of some common pokemon names"""
+
+    return ["pikachu", "charizard", "diglett",
+            "snorlax", "arceus", "squirtle"]
