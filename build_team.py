@@ -2,6 +2,48 @@
 
 import re
 
+import requests
+
+
+def api_request(api_url: str) -> dict:
+    """Returns """
+
+    return
+
+
+def get_all_pokemon_names() -> list:
+    """Returns names of all pokemon on database """
+    try:
+        r_all_pokemon_with_limit = requests.get(
+            "https://pokeapi.co/api/v2/pokemon")
+
+    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
+        Err("Error: Unable to make a successful connection with API!")
+
+    if r_all_pokemon_with_limit.status_code != 200:
+        raise Exception("Error: Not a 200 status code")
+
+    pokemon_data = r_all_pokemon_with_limit.json()
+
+    total_pokemon = pokemon_data["count"]
+
+    # TODO make request with
+    try:
+        r_all_pokemon_without_limit = requests.get(
+            f"https://pokeapi.co/api/v2/pokemon?offset=0&limit={total_pokemon}")
+
+    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
+        Err("Error: Unable to make a successful connection with API!")
+
+    if r_all_pokemon_without_limit.status_code != 200:
+        raise Exception("Error: Not a 200 status code")
+
+    all_pokemon_data = r_all_pokemon_without_limit.json()["results"]
+
+    pokemon_names = [pokemon["name"] for pokemon in all_pokemon_data]
+
+    return pokemon_names
+
 
 class Pokemon():
     def __init__(self, name: str) -> None:
@@ -74,3 +116,10 @@ class Pokemon_Team():
             raise Exception("Error: Your current team of pokemon is full!")
 
         self.current_team.append(pokemon)
+
+
+if __name__ == "__main__":
+
+    pokemon_names = get_all_pokemon_names()
+
+    print(pokemon_names)
