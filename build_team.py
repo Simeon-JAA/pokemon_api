@@ -5,42 +5,37 @@ import re
 import requests
 
 
-def api_request(api_url: str) -> dict:
-    """Returns """
+def api_request_data(api_url: str) -> dict:
+    """Returns the dictionary response from the API"""
 
-    return
+    try:
+        r = requests.get(api_url)
+
+    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
+        Err("Error: Unable to make a successful connection with API!")
+
+    if r.status_code != 200:
+        raise Exception("Error: Not a 200 status code!")
+
+    data = r.json()
+
+    return data
 
 
 def get_all_pokemon_names() -> list:
     """Returns names of all pokemon on database """
-    try:
-        r_all_pokemon_with_limit = requests.get(
-            "https://pokeapi.co/api/v2/pokemon")
 
-    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
-        Err("Error: Unable to make a successful connection with API!")
+    pokemon_data_limited = api_request_data(
+        "https://pokeapi.co/api/v2/pokemon")
 
-    if r_all_pokemon_with_limit.status_code != 200:
-        raise Exception("Error: Not a 200 status code")
+    total_pokemon = pokemon_data_limited["count"]
 
-    pokemon_data = r_all_pokemon_with_limit.json()
+    pokemon_data_all = api_request_data(
+        f"https://pokeapi.co/api/v2/pokemon?offset=0&limit={total_pokemon}")
 
-    total_pokemon = pokemon_data["count"]
+    pokemon_data_all = pokemon_data_all["results"]
 
-    # TODO make request with
-    try:
-        r_all_pokemon_without_limit = requests.get(
-            f"https://pokeapi.co/api/v2/pokemon?offset=0&limit={total_pokemon}")
-
-    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
-        Err("Error: Unable to make a successful connection with API!")
-
-    if r_all_pokemon_without_limit.status_code != 200:
-        raise Exception("Error: Not a 200 status code")
-
-    all_pokemon_data = r_all_pokemon_without_limit.json()["results"]
-
-    pokemon_names = [pokemon["name"] for pokemon in all_pokemon_data]
+    pokemon_names = [pokemon["name"] for pokemon in pokemon_data_all]
 
     return pokemon_names
 
