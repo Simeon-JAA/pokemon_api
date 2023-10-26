@@ -1,7 +1,5 @@
 """Handles all functions related to building a team selected pokemon"""
 
-import re
-
 import requests
 
 
@@ -58,13 +56,56 @@ def get_pokemon_data(pokemon_name: str, pokemon_names_available: list[str]) -> d
     return pokemon_data
 
 
+def filter_pokemon_stats(pokemon_data: dict) -> dict:
+    """Returns the pokemon's stats from the input dictionary"""
+
+    if not isinstance(pokemon_data, dict):
+        raise TypeError("Error: Pokemon data is not in the correct format!")
+
+    if "stats" not in pokemon_data:
+        raise ValueError(
+            "Error: Pokemon data does not contain 'stats' section!")
+
+    pokemon_stats = pokemon_data["stats"]
+
+    stats_to_return = {}
+
+    for stat in pokemon_stats:
+
+        stat_name = stat["stat"]["name"]
+        stat_value = stat["base_stat"]
+
+        if stat_value <= 0:
+            raise ValueError(
+                f"Error: Pokemon stat ({stat_name}) cannot be equal to or less than 0!")
+
+        stats_to_return[stat_name] = stat_value
+
+    return stats_to_return
+
+
+ALL_POKEMON_NAMES = get_all_pokemon_names()
+
+
 class Pokemon():
     def __init__(self, name: str) -> None:
-        self._name = name
+        self._name = name.title()
+        self._stats = {}
 
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def stats(self) -> dict:
+        return self._stats
+
+    @stats.setter
+    def stats(self) -> dict:
+
+        pokemon_data = get_pokemon_data(self.name.lower(), ALL_POKEMON_NAMES)
+
+        return filter_pokemon_stats(pokemon_data)
 
 
 class Pokemon_Team():
@@ -144,3 +185,5 @@ if __name__ == "__main__":
 
         else:
             print("Found")
+            user_pokemon = Pokemon(user_pokemon_name)
+            print(user_pokemon.stats)
