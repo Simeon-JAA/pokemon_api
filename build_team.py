@@ -7,15 +7,15 @@ def api_request_data(api_url: str) -> dict:
     """Returns the dictionary response from the API"""
 
     try:
-        r = requests.get(api_url)
+        api_response = requests.get(api_url)
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
         Err("Error: Unable to make a successful connection with API!")
 
-    if r.status_code != 200:
+    if api_response.status_code != 200:
         raise Exception("Error: Not a 200 status code!")
 
-    data = r.json()
+    data = api_response.json()
 
     return data
 
@@ -88,16 +88,20 @@ ALL_POKEMON_NAMES = get_all_pokemon_names()
 
 
 class Pokemon():
+    """Pokemon class"""
+
     def __init__(self, name: str) -> None:
         self._name = name.title()
         self._stats = {}
 
     @property
     def name(self) -> str:
+        """Returns pokemon name"""
         return self._name
 
     @property
     def stats(self) -> dict:
+        """Returns pokemon's stats"""
         return self._stats
 
     @stats.setter
@@ -108,7 +112,7 @@ class Pokemon():
         return filter_pokemon_stats(pokemon_data)
 
 
-class Pokemon_Team():
+class PokemonTeam():
     """Class for creating a team of pokemon"""
 
     def __init__(self, team_name: str) -> None:
