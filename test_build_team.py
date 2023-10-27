@@ -2,8 +2,7 @@
 
 import pytest
 
-from build_team import PokemonTeam, Pokemon
-from build_team import get_pokemon_data
+from build_team import PokemonTeam
 
 
 def test_class_pokemon_team_invalid_name():
@@ -39,17 +38,3 @@ def test_class_pokemon_team_invalid_name_left_blank():
 
     with pytest.raises(Exception):
         PokemonTeam("")
-
-
-def test_get_pokemon_data_exception_wrong_input():
-    """Tests exception is raised if the wrong input is given to the function"""
-
-    with pytest.raises(Exception):
-        get_pokemon_data(23, "d")
-
-
-def test_get_pokemon_data_exception_pokemon_not_in_list(list_of_pokemon_names):
-    """Tests exception is raised if the wrong input is given to the function"""
-
-    with pytest.raises(Exception):
-        get_pokemon_data("not a pokemon", list_of_pokemon_names)

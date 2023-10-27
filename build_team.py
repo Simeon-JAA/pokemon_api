@@ -1,5 +1,6 @@
 """Handles all functions related to building a team selected pokemon"""
 
+from time import sleep
 import requests
 
 
@@ -38,16 +39,8 @@ def get_all_pokemon_names() -> list:
     return pokemon_names
 
 
-def get_pokemon_data(pokemon_name: str, pokemon_names_available: list[str]) -> dict:
+def get_pokemon_data(pokemon_name: str) -> dict:
     """Returns pokemon data from API"""
-
-    if not isinstance(pokemon_names_available, list | tuple | set):
-        raise TypeError(
-            "Error: Cannot iterate through list of names provided!")
-
-    if pokemon_name.lower() not in pokemon_names_available:
-        raise ValueError(
-            "Error: Pokemon not found in the list of names provided!")
 
     url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
 
@@ -84,13 +77,10 @@ def filter_pokemon_stats(pokemon_data: dict) -> dict:
     return stats_to_return
 
 
-ALL_POKEMON_NAMES = get_all_pokemon_names()
-
-
 class Pokemon():
     """Pokemon class"""
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, pokemon_data: dict) -> None:
         self._name = name.title()
         self._stats = {}
 
@@ -103,13 +93,6 @@ class Pokemon():
     def stats(self) -> dict:
         """Returns pokemon's stats"""
         return self._stats
-
-    @stats.setter
-    def stats(self) -> dict:
-
-        pokemon_data = get_pokemon_data(self.name.lower(), ALL_POKEMON_NAMES)
-
-        return filter_pokemon_stats(pokemon_data)
 
 
 class PokemonTeam():
@@ -189,5 +172,8 @@ if __name__ == "__main__":
 
         else:
             print("Found")
+            sleep(0.5)
+            print("Adding to team!")
+            pokemon_data = get_pokemon_data(user_pokemon,)
             user_pokemon = Pokemon(user_pokemon_name)
             print(user_pokemon.stats)
