@@ -1,6 +1,8 @@
 """Handles all functions related to building a team selected pokemon"""
 
+import re
 from time import sleep
+
 import requests
 
 
@@ -77,6 +79,21 @@ def filter_pokemon_stats(pokemon_data: dict) -> dict:
     return stats_to_return
 
 
+def pass_pokemon_team_name_conditions(team_name: str) -> bool:
+    """If team name passes guard clause, then return the team name"""
+
+    if not isinstance(team_name, str):
+        raise TypeError("Error: Team name should be a string!")
+
+    full_match = re.fullmatch(
+        "[(^\w\d)\s(\w\d$)\-\_\(\)]{3,20}(([\s]{1})([\w\d]+)){1,3}?", team_name)
+
+    if not full_match:
+        raise ValueError("Error: Team name is invalid!")
+
+    return True
+
+
 class Pokemon():
     """Pokemon class"""
 
@@ -105,10 +122,6 @@ class PokemonTeam():
         if not isinstance(team_name, str):
             raise TypeError("Error: Team nam must be a string!")
 
-        if len(team_name) < 4:
-            raise ValueError(
-                "Error: Team name must be longer than 4 characters!")
-
         if len(team_name) > 20:
             raise ValueError(
                 "Error: Team name must be shorter than 20 characters!")
@@ -129,6 +142,10 @@ class PokemonTeam():
     # TODO move edge cases to setter
     @team_name.setter
     def team_name(self, value: str) -> None:
+
+        if len(value) < 4:
+            raise ValueError(
+                "Error: Team name must be longer than 4 characters!")
 
         self._team_name = value
 
@@ -164,17 +181,23 @@ if __name__ == "__main__":
 
     pokemon_names = get_all_pokemon_names()
 
-    while True:
+    user_team = PokemonTeam("Te")
+    print(user_team.team_name)
 
-        user_pokemon_name = input("Please chose your pokemon: ").lower()
+    user_team.team_name = 'Team 1'
+    print(user_team.team_name)
 
-        if user_pokemon_name not in pokemon_names:
-            print("Not found")
+    # while True:
 
-        else:
-            print("Found")
-            sleep(0.5)
-            print("Adding to team!")
-            pokemon_data = get_pokemon_data(user_pokemon_name)
-            user_pokemon = Pokemon(user_pokemon_name, pokemon_data)
-            print(user_pokemon.stats)
+    #     user_pokemon_name = input("Please chose your pokemon: ").lower()
+
+    #     if user_pokemon_name not in pokemon_names:
+    #         print("Not found")
+
+    #     else:
+    #         print("Found")
+    #         sleep(0.5)
+    #         print("Adding to team!")
+    #         pokemon_data = get_pokemon_data(user_pokemon_name)
+    #         user_pokemon = Pokemon(user_pokemon_name, pokemon_data)
+    #         print(user_pokemon.stats)
