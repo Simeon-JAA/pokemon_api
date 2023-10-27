@@ -176,23 +176,23 @@ if __name__ == "__main__":
 
     pokemon_names = get_all_pokemon_names()
 
-    user_team = PokemonTeam("Te")
+    user_team = PokemonTeam("Team 1")
     print(user_team.team_name)
 
-    user_team.team_name = 'Team 1'
+    user_team.team_name = 'Team 2'
     print(user_team.team_name)
 
-    # while True:
+    while True:
 
-    #     user_pokemon_name = input("Please chose your pokemon: ").lower()
+        user_pokemon_name = input("Please chose your pokemon: ").lower()
 
-    #     if user_pokemon_name not in pokemon_names:
-    #         print("Not found")
+        if user_pokemon_name not in pokemon_names:
+            print("Not found")
 
-    #     else:
-    #         print("Found")
-    #         sleep(0.5)
-    #         print("Adding to team!")
-    #         pokemon_data = get_pokemon_data(user_pokemon_name)
-    #         user_pokemon = Pokemon(user_pokemon_name, pokemon_data)
-    #         print(user_pokemon.stats)
+        else:
+            print("Found")
+            sleep(0.5)
+            print("Adding to team!")
+            pokemon_data = get_pokemon_data(user_pokemon_name)
+            user_pokemon = Pokemon(user_pokemon_name, pokemon_data)
+            print(user_pokemon.stats)
