@@ -81,8 +81,9 @@ class Pokemon():
     """Pokemon class"""
 
     def __init__(self, name: str, pokemon_data: dict) -> None:
+        self._all_pokemon_data = get_pokemon_data(name)
         self._name = name.title()
-        self._stats = {}
+        self._stats = filter_pokemon_stats(self._all_pokemon_data)
 
     @property
     def name(self) -> str:
@@ -174,6 +175,6 @@ if __name__ == "__main__":
             print("Found")
             sleep(0.5)
             print("Adding to team!")
-            pokemon_data = get_pokemon_data(user_pokemon,)
-            user_pokemon = Pokemon(user_pokemon_name)
+            pokemon_data = get_pokemon_data(user_pokemon_name)
+            user_pokemon = Pokemon(user_pokemon_name, pokemon_data)
             print(user_pokemon.stats)
