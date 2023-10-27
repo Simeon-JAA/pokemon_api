@@ -118,18 +118,12 @@ class PokemonTeam():
 
     def __init__(self, team_name: str) -> None:
 
-        # TODO figure out how to move edge cases into setter
         if not isinstance(team_name, str):
             raise TypeError("Error: Team nam must be a string!")
 
-        if len(team_name) > 20:
-            raise ValueError(
-                "Error: Team name must be shorter than 20 characters!")
+        if pass_pokemon_team_name_conditions(team_name):
+            self._team_name = team_name
 
-        if len(team_name) == team_name.count(" "):
-            raise ValueError("Error: Team name cannot be empty spaces!")
-
-        self._team_name = team_name
         self._current_team = []
         self._current_team_max_pokemon = 4
         self._reserve_team = []
@@ -139,15 +133,16 @@ class PokemonTeam():
         """Returns team name"""
         return self._team_name
 
-    # TODO move edge cases to setter
     @team_name.setter
     def team_name(self, value: str) -> None:
+        """Team name setter"""
 
-        if len(value) < 4:
-            raise ValueError(
-                "Error: Team name must be longer than 4 characters!")
+        if not isinstance(value, str):
+            raise TypeError("Error: Team name should be a string!")
 
-        self._team_name = value
+        if pass_pokemon_team_name_conditions(value):
+            print(f"Team name has successfully been changed to {value}!")
+            self._team_name = value
 
     @property
     def current_team(self) -> list:
