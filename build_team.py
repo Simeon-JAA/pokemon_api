@@ -175,14 +175,13 @@ class PokemonTeam():
 def build_initial_pokemon_team(pokemon_team: PokemonTeam, pokemon_names: list[str]) -> PokemonTeam:
     """Will build the initial pokemon team"""
 
-    current_team = pokemon_team.current_team
-
-    current_team_names = [x.name.lower() for x in current_team]
-
     max_team_members = pokemon_team.current_team_max_pokemon
     team_members = 0
 
     while team_members < max_team_members:
+
+        current_team = pokemon_team.current_team
+        current_team_names = [x.name.lower() for x in current_team]
 
         name = input("Please chose your pokemon: ").lower()
 
