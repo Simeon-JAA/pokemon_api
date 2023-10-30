@@ -23,7 +23,7 @@ def api_request_data(api_url: str) -> dict:
     return data
 
 
-def get_all_pokemon_names() -> list:
+def get_all_pokemon_names() -> list[str]:
     """Returns names of all pokemon on database """
 
     pokemon_data_limited = api_request_data(
@@ -145,17 +145,17 @@ class PokemonTeam():
             self._team_name = value
 
     @property
-    def current_team(self) -> list:
+    def current_team(self) -> list[Pokemon]:
         """Returns list of the current team"""
         return self._current_team
 
     @property
-    def reserve_team(self) -> list:
+    def reserve_team(self) -> list[Pokemon]:
         """Returns list of the reserve team"""
         return self._reserve_team
 
     @property
-    def current_team_max_pokemon(self) -> list:
+    def current_team_max_pokemon(self) -> int:
         """Returns max pokemon allowed in current team"""
         return self._current_team_max_pokemon
 
