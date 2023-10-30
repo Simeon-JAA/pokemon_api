@@ -172,27 +172,39 @@ class PokemonTeam():
         self.current_team.append(pokemon)
 
 
+def build_initial_pokemon_team(pokemon_team: PokemonTeam, pokemon_names: list[str]) -> PokemonTeam:
+    """Will build the initial pokemon team"""
+
+    current_team = pokemon_team.current_team
+
+    current_team_names = [x.name.lower() for x in current_team]
+
+    max_team_members = pokemon_team.current_team_max_pokemon
+    team_members = 0
+
+    while team_members < max_team_members:
+
+        name = input("Please chose your pokemon: ").lower()
+
+        if name not in pokemon_names:
+            print("Error: Pokemon not found!")
+
+        elif name in current_team_names:
+            print("Error: Pokemon already in team!")
+
+        else:
+            print("Pokemon found!")
+            sleep(0.5)
+            print(f"Adding {name.title()} to team!")
+            team_members += 1
+
+    return pokemon_team
+
+
 if __name__ == "__main__":
 
     pokemon_names = get_all_pokemon_names()
 
-    user_team = PokemonTeam("Team 1")
-    print(user_team.team_name)
+    pokemon_team = PokemonTeam("Example Team")
 
-    user_team.team_name = 'Team 2'
-    print(user_team.team_name)
-
-    while True:
-
-        user_pokemon_name = input("Please chose your pokemon: ").lower()
-
-        if user_pokemon_name not in pokemon_names:
-            print("Not found")
-
-        else:
-            print("Found")
-            sleep(0.5)
-            print("Adding to team!")
-            pokemon_data = get_pokemon_data(user_pokemon_name)
-            user_pokemon = Pokemon(user_pokemon_name, pokemon_data)
-            print(user_pokemon.stats)
+    pokemon_team = build_initial_pokemon_team(pokemon_team, pokemon_names)
