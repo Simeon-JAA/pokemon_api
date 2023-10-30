@@ -97,7 +97,7 @@ def pass_pokemon_team_name_conditions(team_name: str) -> bool:
 class Pokemon():
     """Pokemon class"""
 
-    def __init__(self, name: str, pokemon_data: dict) -> None:
+    def __init__(self, name: str) -> None:
         self._all_pokemon_data = get_pokemon_data(name)
         self._name = name.title()
         self._stats = filter_pokemon_stats(self._all_pokemon_data)
@@ -195,7 +195,9 @@ def build_initial_pokemon_team(pokemon_team: PokemonTeam, pokemon_names: list[st
         else:
             print("Pokemon found!")
             sleep(0.5)
+            pokemon_to_add = Pokemon(name)
             print(f"Adding {name.title()} to team!")
+            pokemon_team.add_pokemon_to_current_team(pokemon_to_add)
             team_members += 1
 
     return pokemon_team
@@ -208,3 +210,6 @@ if __name__ == "__main__":
     pokemon_team = PokemonTeam("Example Team")
 
     pokemon_team = build_initial_pokemon_team(pokemon_team, pokemon_names)
+
+    for pokemon in pokemon_team.current_team:
+        print(pokemon.name)
