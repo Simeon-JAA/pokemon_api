@@ -7,7 +7,7 @@ from psycopg2 import connect
 from psycopg2.extensions import connection
 
 
-def get_db_connection(config) -> connection:
+def get_db_connection(config: dict) -> connection:
     """Returns connection to the db"""
     try:
         conn = connect(dbname=config["DBNAME"],
@@ -18,6 +18,16 @@ def get_db_connection(config) -> connection:
         con_err("Error: Unable to establish connection to the database!")
 
     return conn
+
+
+def get_user_id(conn: connection, user_name: str) -> int:
+    """Returns the user_id"""
+
+    cur = conn.cursor()
+
+    cur.close()
+
+    return
 
 
 if __name__ == "__main__":
