@@ -26,14 +26,3 @@ def test_get_user_id_calls_cursor(mock_db_connection):
     get_user_id(mock_db_connection, "fake user_name")
 
     assert mock_db_connection.cursor.call_count == 1
-
-
-@patch("db_functions.get_db_connection")
-def test_get_user_id_calls_cursor(mock_db_connection):
-    """Tests that a cursor is acquired in the function get_user_id"""
-
-    mock_db_connection.return_value = connection
-
-    result = get_user_id(mock_db_connection, "fake user_name")
-
-    assert mock_db_connection.cursor.call_count == 1
