@@ -76,12 +76,26 @@ CREATE TABLE pokemon_stats (
 
 INSERT INTO api_user 
 (user_name)
-VALUES ('example_user') RETURNING *;
+VALUES 
+('example_user_1'), ('example_user_2'),
+('example_user_3'), ('example_user_4')
+ RETURNING *;
 
 INSERT INTO user_pokemon 
 (user_id, pokemon_name)
-VALUES (1, 'pikachu') RETURNING *;
+VALUES 
+(1, 'pikachu'), (1, 'charizard'), (1, 'diglett'),
+(2, 'squirtle'), (2, 'pikachu'), 
+(3, 'snorlax')
+ RETURNING *;
 
 INSERT INTO pokemon_stats 
 (pokemon_id, pokemon_type, attack, defense, health, pokemon_height, pokemon_weight)
-VALUES (1, 'thunder', 20, 20, 20, 5, 100) RETURNING *; 
+VALUES 
+(1, 'thunder', 20, 20, 100, 5, 100),
+(2, 'fire', 30, 50, 255, 100, 1500),
+(3, 'earth', 10, 5, 50, 2, 77),
+(4, 'water', 17, 10, 10, 9, 120),
+(5, 'thunder', 20, 20, 100, 5, 100),
+(6, 'earth', 200, 200, 255, 120, 2000)
+ RETURNING *; 
