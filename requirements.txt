@@ -2,3 +2,4 @@ requests
 pytest
 psycopg2
 python-dotenv
+pandas
