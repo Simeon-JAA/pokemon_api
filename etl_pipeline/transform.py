@@ -4,7 +4,7 @@
 def filter_pokemon_stats(pokemon_data: dict) -> dict:
     """Filters out the stats section of the pokemon data"""
 
-    return pokemon_data
+    keys = {"base_stat", "stat", "name"}
 
 
 if __name__ == "__main__":
