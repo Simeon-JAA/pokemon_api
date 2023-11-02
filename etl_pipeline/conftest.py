@@ -51,3 +51,20 @@ def mock_api_json_return_data_no_count_key() -> dict:
              "url": "pokemon_3_url"},
         ]
     }
+
+
+@pytest.fixture
+def mock_api_json_return_data_single_pokemon() -> dict:
+    """Mocks the api json data that is returned for a single pokemon"""
+
+    return {
+        "abilities": [],
+        "id": 1,
+        "height": 400,
+        "weight": 400,
+        "is_default": True,
+        "moves": [],
+        "name": "pokemon_name",
+        "stats": [],
+        "types": []
+    }

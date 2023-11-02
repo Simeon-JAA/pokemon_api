@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from extract import api_request_data, get_pokemon_count, get_pokemon_urls
+from extract import extract_single_pokemon
 
 
 @patch("extract.requests")
@@ -151,3 +152,44 @@ def test_get_pokemon_urls_status_code_404_raises_exception(mock_requests, mock_a
 
     with pytest.raises(Exception):
         get_pokemon_urls(1234)
+
+
+@patch("extract.requests")
+def test_extract_single_pokemon_status_code_200_base_case(mock_requests, mock_api_json_return_data_single_pokemon):
+    """Tests base case for 200 status code in function extract_single_pokemon"""
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = mock_api_json_return_data_single_pokemon
+    mock_requests.get.return_value = mock_response
+
+    result = extract_single_pokemon("mock_url")
+
+    assert isinstance(mock_api_json_return_data_single_pokemon, dict)
+    assert result == mock_api_json_return_data_single_pokemon
+
+
+@patch("extract.requests")
+def test_extract_single_pokemon_status_code_400_raises_exception(mock_requests, mock_api_json_return_data_single_pokemon):
+    """Tests exception is raised for 400 status code in function extract_single_pokemon"""
+
+    mock_response = MagicMock()
+    mock_response.status_code = 400
+    mock_response.json.return_value = mock_api_json_return_data_single_pokemon
+    mock_requests.get.return_value = mock_response
+
+    with pytest.raises(Exception):
+        extract_single_pokemon("mock_url")
+
+
+@patch("extract.requests")
+def test_extract_single_pokemon_status_code_404_raises_exception(mock_requests, mock_api_json_return_data_single_pokemon):
+    """Tests exception is raised for 404 status code in function extract_single_pokemon"""
+
+    mock_response = MagicMock()
+    mock_response.status_code = 404
+    mock_response.json.return_value = mock_api_json_return_data_single_pokemon
+    mock_requests.get.return_value = mock_response
+
+    with pytest.raises(Exception):
+        extract_single_pokemon("mock_url")
