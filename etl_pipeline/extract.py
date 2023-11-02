@@ -25,9 +25,16 @@ def get_pokemon_count() -> int:
 
     url = "https://pokeapi.co/api/v2/pokemon"
 
-    data = api_request_data(url)
+    try:
+        data = api_request_data(url)
 
-    pokemon_count = data["count"]
+    except:
+        Exception("Error: Error making request to the API!")
+
+    if "count" not in data:
+        raise KeyError("Error: 'Count' not available in data!")
+
+    pokemon_count = int(data["count"])
 
     return pokemon_count
 
