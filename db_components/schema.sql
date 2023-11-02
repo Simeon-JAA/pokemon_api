@@ -15,6 +15,7 @@ CREATE TABLE user_pokemon (
     user_pokemon_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     user_id SMALLINT NOT NULL,
     pokemon_name TEXT NOT NULL,
+    in_current_team BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (user_pokemon_id)
 );
 
@@ -36,7 +37,6 @@ CREATE TABLE pokemon_stats (
     CONSTRAINT check_weight CHECK (pokemon_weight > 0)
 );
 
-
 CREATE SCHEMA example;
 
 SET SEARCH_PATH TO example;
@@ -52,9 +52,9 @@ CREATE TABLE user_pokemon (
     user_pokemon_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     user_id SMALLINT NOT NULL,
     pokemon_name TEXT NOT NULL,
+    in_current_team BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (user_pokemon_id)
 );
-
 
 CREATE TABLE pokemon_stats (
     pokemon_stats_id SMALLINT GENERATED ALWAYS AS IDENTITY,
@@ -82,11 +82,11 @@ VALUES
  RETURNING *;
 
 INSERT INTO user_pokemon 
-(user_id, pokemon_name)
+(user_id, pokemon_name, in_current_team)
 VALUES 
-(1, 'pikachu'), (1, 'charizard'), (1, 'diglett'),
-(2, 'squirtle'), (2, 'pikachu'), 
-(3, 'snorlax')
+(1, 'pikachu', TRUE), (1, 'charizard', TRUE), (1, 'diglett', TRUE),
+(2, 'squirtle', TRUE), (2, 'pikachu', FALSE), 
+(3, 'snorlax', TRUE)
  RETURNING *;
 
 INSERT INTO pokemon_stats 
