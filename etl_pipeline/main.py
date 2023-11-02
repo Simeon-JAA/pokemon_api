@@ -1,7 +1,15 @@
 """ETL process"""
 
-from extract import extract_all_pokemon
+from extract import extract_all_pokemon_urls, extract_single_pokemon
 
 if __name__ == "__main__":
 
-    extract_all_pokemon()
+    pokemon_urls = extract_all_pokemon_urls()
+
+    for url in pokemon_urls:
+
+        pokemon_data = extract_single_pokemon(url)
+
+        print(url)
+
+        break

@@ -63,6 +63,16 @@ def extract_single_pokemon(url: str) -> None:
     return data
 
 
+def extract_all_pokemon_urls() -> list[str]:
+    """Extracts all pokemon urls (for main.py)"""
+
+    pokemon_count = get_pokemon_count()
+
+    pokemon_urls = get_pokemon_urls(pokemon_count)
+
+    return pokemon_urls
+
+
 def extract_all_pokemon() -> None:
     """Extracts all pokemon from the API"""
 
@@ -71,7 +81,9 @@ def extract_all_pokemon() -> None:
     pokemon_urls = get_pokemon_urls(pokemon_count)
 
     for url in pokemon_urls:
-        print(extract_single_pokemon(url))
+
+        pokemon_data = extract_single_pokemon(url)
+
         break
 
 
