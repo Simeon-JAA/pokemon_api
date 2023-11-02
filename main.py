@@ -123,12 +123,12 @@ if __name__ == "__main__":
 
     print("Search for pokemon")
 
-    selected_pokemon = input("Input pokemon:")
+    while True:
 
-    pokemon_data = get_pokemon(selected_pokemon)
+        selected_pokemon = input("Input pokemon:")
 
-    # pokemon_stats = get_pokemon_stats(pokemon_data)
-    pokemon_abilities = get_pokemon_abilities(pokemon_data)
+        pokemon_data = get_pokemon(selected_pokemon)
 
-    # print(pokemon_stats)
-    print(pokemon_abilities)
+        pokemon_stats = get_pokemon_stats(pokemon_data)
+
+        print(pokemon_stats)
