@@ -22,7 +22,6 @@ CREATE TABLE user_pokemon (
 CREATE TABLE pokemon_stats (
     pokemon_stats_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     pokemon_id SMALLINT UNIQUE NOT NULL,
-    pokemon_type TEXT NOT NULL, --CREATE AN ENUM FOR THIS MAYBE
     health SMALLINT NOT NULL,
     attack SMALLINT NOT NULL,
     defense SMALLINT NOT NULL,
@@ -39,6 +38,14 @@ CREATE TABLE pokemon_stats (
     CONSTRAINT check_health CHECK (health >= 0 AND health <= 255),
     CONSTRAINT check_height CHECK (pokemon_height > 0),
     CONSTRAINT check_weight CHECK (pokemon_weight > 0)
+);
+
+CREATE TABLE pokemon_types (
+    pokemon_types_id INT GENERATED ALWAYS AS IDENTITY,
+    pokemon_id INT UNIQUE NOT NULL,
+    pokemon_type TEXT NOT NULL, --potentially make an ENUM TYPE
+    PRIMARY KEY (pokemon_types_id),
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon_stats(pokemon_id)
 );
 
 CREATE SCHEMA example;
@@ -63,7 +70,6 @@ CREATE TABLE user_pokemon (
 CREATE TABLE pokemon_stats (
     pokemon_stats_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     pokemon_id SMALLINT UNIQUE NOT NULL,
-    pokemon_type TEXT NOT NULL, --CREATE AN ENUM FOR THIS MAYBE
     attack SMALLINT NOT NULL,
     defense SMALLINT NOT NULL,
     special_attack SMALLINT NOT NULL,
@@ -82,6 +88,14 @@ CREATE TABLE pokemon_stats (
     CONSTRAINT check_weight CHECK (pokemon_weight > 0)
 );
 
+CREATE TABLE pokemon_types (
+    pokemon_types_id INT GENERATED ALWAYS AS IDENTITY,
+    pokemon_id INT UNIQUE NOT NULL,
+    pokemon_type TEXT NOT NULL,
+    PRIMARY KEY (pokemon_types_id),
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon_stats(pokemon_id)
+);
+
 INSERT INTO api_user 
 (user_name)
 VALUES 
@@ -98,13 +112,24 @@ VALUES
  RETURNING *;
 
 INSERT INTO pokemon_stats 
-(pokemon_id, pokemon_type, attack, defense,
+(pokemon_id, attack, defense,
 special_attack, special_defense, health, pokemon_height, pokemon_weight)
 VALUES 
-(1, 'thunder', 20, 20, 20, 20, 100, 5, 100),
-(2, 'fire', 30, 50, 20, 20, 255, 100, 1500),
-(3, 'earth', 10, 5, 20, 20, 50, 2, 77),
-(4, 'water', 17, 10, 20, 20, 10, 9, 120),
-(5, 'thunder', 20, 20, 20, 20, 100, 5, 100),
-(6, 'earth', 200, 200, 20, 20, 255, 120, 2000)
- RETURNING *; 
+(1, 20, 20, 20, 20, 100, 5, 100),
+(2, 30, 50, 20, 20, 255, 100, 1500),
+(3, 10, 5, 20, 20, 50, 2, 77),
+(4, 17, 10, 20, 20, 10, 9, 120),
+(5, 20, 20, 20, 20, 100, 5, 100),
+(6, 200, 200, 20, 20, 255, 120, 2000)
+RETURNING *; 
+
+INSERT INTO pokemon_types
+(pokemon_id, pokemon_type)
+VALUES
+(1, 'thunder'),
+(2, 'fire'),
+(3, 'earth'),
+(4, 'water'),
+(5, 'thunder'),
+(6, 'earth')
+RETURNING *;
