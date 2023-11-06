@@ -55,13 +55,14 @@ def get_pokemon_urls(api_pokemon_count: int) -> list[str]:
     return pokemon_urls
 
 
-# Could be ion transform script?
+# Could be in transform script?
 def get_pokemon_stats(pokemon_data: dict) -> dict:
     """Returns pokemon stats"""
 
     base_stats = {}
 
     pokemon_stats_only = pokemon_data["stats"]
+    pokemon_types_only = pokemon_data["types"]
 
     for stat in pokemon_stats_only:
 
@@ -69,11 +70,17 @@ def get_pokemon_stats(pokemon_data: dict) -> dict:
         stat_value = stat["base_stat"]
         base_stats[stat_name] = stat_value
 
+    pokemon_types = []
+
+    for pokemon_type in pokemon_types_only:
+        pokemon_types.append(pokemon_type["type"]["name"])
+
     pokemon_height = pokemon_data["height"]
     pokemon_weight = pokemon_data["weight"]
 
     base_stats["height"] = pokemon_height
     base_stats["weight"] = pokemon_weight
+    base_stats["types"] = pokemon_types
 
     return base_stats
 
