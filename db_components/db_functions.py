@@ -85,11 +85,14 @@ def get_specified_user_pokemon_stats(conn: connection, user_id: int, pokemon_nam
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""SELECT pokemon_id, pokemon_name, pokemon_type, attack,
-                defense, health, pokemon_height, pokemon_weight
+    cur.execute("""SELECT eps.pokemon_id, pokemon_name, health, attack,
+                defense, special_attack, special_defense,
+                pokemon_height, pokemon_weight
                 FROM example.pokemon_stats AS eps
                 RIGHT JOIN example.user_pokemon AS eup
                 ON eps.pokemon_id = eup.user_pokemon_id
+                LEFT JOIN example.pokemon_types AS ept
+                ON eps.pokemon_id = ept.pokemon_id
                 WHERE eup.user_id = %s
                 AND eup.pokemon_name = %s;""",
                 [user_id, pokemon_name.lower()])
