@@ -126,10 +126,10 @@ RETURNING *;
 INSERT INTO pokemon_types
 (pokemon_id, pokemon_type)
 VALUES
-(1, 'thunder'),
+(1, 'electric'),
 (2, 'fire'),
-(3, 'earth'),
+(3, 'ground'),
 (4, 'water'),
 (5, 'thunder'),
-(6, 'earth')
+(6, 'normal')
 RETURNING *;
