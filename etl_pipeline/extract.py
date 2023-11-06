@@ -55,10 +55,37 @@ def get_pokemon_urls(api_pokemon_count: int) -> list[str]:
     return pokemon_urls
 
 
+# Could be ion transform script?
+def get_pokemon_stats(pokemon_data: dict) -> dict:
+    """Returns pokemon stats"""
+
+    base_stats = {}
+
+    pokemon_stats_only = pokemon_data["stats"]
+
+    for stat in pokemon_stats_only:
+
+        stat_name = stat["stat"]["name"]
+        stat_value = stat["base_stat"]
+        base_stats[stat_name] = stat_value
+
+    pokemon_height = pokemon_data["height"]
+    pokemon_weight = pokemon_data["weight"]
+
+    base_stats["height"] = pokemon_height
+    base_stats["weight"] = pokemon_weight
+
+    return base_stats
+
+
 def extract_single_pokemon(url: str) -> None:
     """Extracts data associated with one pokemon from URL provided"""
 
     data = api_request_data(url)
+
+    pokemon_stats = get_pokemon_stats(data)
+
+    print(pokemon_stats)
 
     return data
 
