@@ -55,12 +55,99 @@ def get_pokemon_urls(api_pokemon_count: int) -> list[str]:
     return pokemon_urls
 
 
+def get_pokemon_stats(pokemon_data: dict) -> dict:
+    """Returns pokemon stats"""
+
+    base_stats = {}
+
+    pokemon_stats_only = pokemon_data["stats"]
+    pokemon_types_only = pokemon_data["types"]
+
+    for stat in pokemon_stats_only:
+
+        stat_name = stat["stat"]["name"]
+        stat_value = stat["base_stat"]
+        base_stats[stat_name] = stat_value
+
+    pokemon_types = []
+
+    for pokemon_type in pokemon_types_only:
+        pokemon_types.append(pokemon_type["type"]["name"])
+
+    pokemon_height = pokemon_data["height"]
+    pokemon_weight = pokemon_data["weight"]
+
+    base_stats["height"] = pokemon_height
+    base_stats["weight"] = pokemon_weight
+    base_stats["types"] = pokemon_types
+
+    return base_stats
+
+
+def get_pokemon_abilities(pokemon_data: dict) -> list[dict]:
+    """Returns the pokemon's abilities"""
+
+    abilities_to_return = []
+
+    desired_ability_keys = {"effect_entries", "flavor_text_entries", "names"}
+    pokemon_abilities = pokemon_data["abilities"]
+
+    for ability in pokemon_abilities:
+
+        ability_url = ability["ability"]["url"]
+        ability_data = api_request_data(ability_url)
+
+        ability_data_filtered = dict((k, v) for
+                                     k, v in ability_data.items()
+                                     if k in desired_ability_keys)
+
+        abilities_to_return.append(ability_data_filtered)
+
+    return abilities_to_return
+
+
+def get_pokemon_moves(pokemon_data: dict) -> list[dict]:
+    """Returns list of pokemon moves from API"""
+
+    pokemon_moves_to_transform = []
+
+    desired_move_keys = {"accuracy",
+                         "flavor_text_entries", "names", "power",
+                         "pp", "priority", "damage_class"}
+
+    pokemon_moves = pokemon_data["moves"]
+
+    for move in pokemon_moves:
+        move_url = move["move"]["url"]
+        move_data = api_request_data(move_url)
+        move_data_filtered = dict((k, v) for k, v
+                                  in move_data.items()
+                                  if k in desired_move_keys)
+
+        pokemon_moves_to_transform.append(move_data_filtered)
+
+    return pokemon_moves_to_transform
+
+
 def extract_single_pokemon(url: str) -> None:
     """Extracts data associated with one pokemon from URL provided"""
 
     data = api_request_data(url)
 
-    return data
+    pokemon_data_to_transform = {}
+
+    pokemon_stats = get_pokemon_stats(data)
+    pokemon_data_to_transform["stats"] = pokemon_stats
+
+    pokemon_abilities = get_pokemon_abilities(data)
+    pokemon_data_to_transform["abilities"] = pokemon_abilities
+
+    pokemon_moves = get_pokemon_moves(data)
+    pokemon_data_to_transform["moves"] = pokemon_moves
+
+    print(pokemon_moves)
+
+    return pokemon_data_to_transform
 
 
 def extract_all_pokemon_urls() -> list[str]:
