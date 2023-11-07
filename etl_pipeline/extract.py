@@ -55,7 +55,6 @@ def get_pokemon_urls(api_pokemon_count: int) -> list[str]:
     return pokemon_urls
 
 
-# Could be in transform script?
 def get_pokemon_stats(pokemon_data: dict) -> dict:
     """Returns pokemon stats"""
 
@@ -90,7 +89,7 @@ def get_pokemon_abilities(pokemon_data: dict) -> list[dict]:
 
     abilities_to_return = []
 
-    ability_keys = {"effect_entries", "flavor_text_entries", "names"}
+    desired_ability_keys = {"effect_entries", "flavor_text_entries", "names"}
     pokemon_abilities = pokemon_data["abilities"]
 
     for ability in pokemon_abilities:
@@ -100,7 +99,7 @@ def get_pokemon_abilities(pokemon_data: dict) -> list[dict]:
 
         ability_data_filtered = dict((k, v) for
                                      k, v in ability_data.items()
-                                     if k in ability_keys)
+                                     if k in desired_ability_keys)
 
         abilities_to_return.append(ability_data_filtered)
 
@@ -112,11 +111,20 @@ def get_pokemon_moves(pokemon_data: dict) -> list[dict]:
 
     pokemon_moves_to_transform = []
 
+    desired_move_keys = {"accuracy",
+                         "flavor_text_entries", "names", "power",
+                         "pp", "priority", "damage_class"}
+
     pokemon_moves = pokemon_data["moves"]
 
     for move in pokemon_moves:
         move_url = move["move"]["url"]
-        print(move_url)
+        move_data = api_request_data(move_url)
+        move_data_filtered = dict((k, v) for k, v
+                                  in move_data.items()
+                                  if k in desired_move_keys)
+
+        pokemon_moves_to_transform.append(move_data_filtered)
 
     return pokemon_moves_to_transform
 
