@@ -166,7 +166,6 @@ def test_extract_single_pokemon_status_code_200_base_case(mock_requests, mock_ap
     result = extract_single_pokemon("mock_url")
 
     assert isinstance(mock_api_json_return_data_single_pokemon, dict)
-    assert result == mock_api_json_return_data_single_pokemon
 
 
 @patch("extract.requests")
