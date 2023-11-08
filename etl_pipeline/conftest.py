@@ -284,3 +284,19 @@ def mock_effect_entries_four_en_three_es() -> list[dict]:
          'language': {'name': 'es', 'url': 'mock language["url"] 7'},
          'short_effect': 'mock short effect (not english) 7'},
     ]
+
+
+@pytest.fixture
+def mock_names_en_sp_fr_zh() -> list[dict]:
+    """Mocks pokemon ability names"""
+
+    return [
+        {'language': {'name': 'en', 'url': 'mock language url'},
+         'name': 'mock ability name (english) 1'},
+        {'language': {'name': 'fr', 'url': 'mock language url'},
+         'name': 'mock ability name (french) 2'},
+        {'language': {'name': 'es', 'url': 'mock language url'},
+         'name': 'mock ability name (spanish) 3'},
+        {'language': {'name': 'zh', 'url': 'mock language url'},
+         'name': 'mock ability name (chinese) 4'},
+    ]

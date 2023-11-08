@@ -1,7 +1,7 @@
 """Testing file for transform"""
 
 from transform import set_abilities_language, filter_flavor_text_entries
-from transform import filter_effect_entries
+from transform import filter_effect_entries, filter_ability_name
 
 
 def test_filter_flavor_text_entries_version_group_changed_to_string(mock_flavor_text_entries_three_en_two_fr):
@@ -101,3 +101,43 @@ def test_filter_effect_entries_check_short_effect_value_spanish(mock_effect_entr
 
     for entry in result:
         assert "mock short effect (not english)" in entry["short_effect"]
+
+
+def test_filter_ability_name_returns_dict(mock_names_en_sp_fr_zh):
+    """Tests function filter_ability_name returns dictionary"""
+
+    result = filter_ability_name(mock_names_en_sp_fr_zh)
+
+    assert isinstance(result, dict)
+
+
+def test_filter_ability_name_returns_name_english(mock_names_en_sp_fr_zh):
+    """Tests function filter_ability_name returns correct name"""
+
+    result = filter_ability_name(mock_names_en_sp_fr_zh)
+
+    assert "mock ability name (english)" in result["name"]
+
+
+def test_filter_ability_name_returns_name_spanish(mock_names_en_sp_fr_zh):
+    """Tests function filter_ability_name returns correct name (spanish)"""
+
+    result = filter_ability_name(mock_names_en_sp_fr_zh, "es")
+
+    assert "mock ability name (spanish)" in result["name"]
+
+
+def test_filter_ability_name_returns_name_french(mock_names_en_sp_fr_zh):
+    """Tests function filter_ability_name returns correct name (french)"""
+
+    result = filter_ability_name(mock_names_en_sp_fr_zh, "fr")
+
+    assert "mock ability name (french)" in result["name"]
+
+
+def test_filter_ability_name_returns_name_chinese(mock_names_en_sp_fr_zh):
+    """Tests function filter_ability_name returns correct name (chinese)"""
+
+    result = filter_ability_name(mock_names_en_sp_fr_zh, "zh")
+
+    assert "mock ability name (chinese)" in result["name"]
