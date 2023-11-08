@@ -84,7 +84,8 @@ def mock_extracted_pokemon_data() -> dict:
                              'short_effect': 'Strengthens grass moves to inflict 1.5× damage at 1/3 max HP or less.'},
                             {'effect': 'Wenn ein Pokémon mit dieser Fähigkeit nur noch 1/3 seiner maximalen hp oder weniger hat, werden all seine grass Attacken verstärkt, so dass sie 1,5× so viel regular damage anrichten wie sonst.',
                              'language': {'name': 'de', 'url': 'https://pokeapi.co/api/v2/language/6/'},
-                             'short_effect': 'Erhöht den Schaden von grass Attacken um 50% wenn nur noch 1/3 der maximalen hp oder weniger übrig sind.'}],
+                             'short_effect': 'Erhöht den Schaden von grass Attacken um 50% wenn nur noch 1/3 der maximalen hp oder weniger übrig sind.'}
+                            ],
                            'flavor_text_entries': [{'flavor_text': 'Ups GRASS moves in a pinch.',
                                                     'language': {'name': 'en', 'url': 'https://pokeapi.co/api/v2/language/9/'},
                                                     'version_group': {'name': 'ruby-sapphire', 'url': 'https://pokeapi.co/api/v2/version-group/5/'}},
@@ -253,4 +254,33 @@ def mock_flavor_text_entries_three_en_two_fr() -> list[dict]:
          'language': {'name': 'fr', 'url': 'mock language url 5'},
          'version_group': {'name': 'mock pokemon version_group["name"] 5', 'url': 'mock version group url 5'}},
 
+    ]
+
+
+@pytest.fixture
+def mock_effect_entries_four_en_three_es() -> list[dict]:
+    """Mocks pokemon effect entries"""
+
+    return [
+        {'effect': 'mock effect (english) 1',
+         'language': {'name': 'en', 'url': 'mock language["url"] 1'},
+         'short_effect': 'mock short effect (english) 1'},
+        {'effect': 'mock effect (english) 2',
+         'language': {'name': 'en', 'url': 'mock language["url"] 2'},
+         'short_effect': 'mock short effect (english) 2'},
+        {'effect': 'mock effect (english) 3',
+         'language': {'name': 'en', 'url': 'mock language["url"] 3'},
+         'short_effect': 'mock short effect (english) 3'},
+        {'effect': 'mock effect (english) 4',
+         'language': {'name': 'en', 'url': 'mock language["url"] 4'},
+         'short_effect': 'mock short effect (english) 4'},
+        {'effect': 'mock effect (spanish) 5',
+         'language': {'name': 'es', 'url': 'mock language["url"] 5'},
+         'short_effect': 'mock short effect (not english) 5'},
+        {'effect': 'mock effect (spanish) 6',
+         'language': {'name': 'es', 'url': 'mock language["url"] 6'},
+         'short_effect': 'mock short effect (not english) 6'},
+        {'effect': 'mock effect (spanish) 7',
+         'language': {'name': 'es', 'url': 'mock language["url"] 7'},
+         'short_effect': 'mock short effect (not english) 7'},
     ]
