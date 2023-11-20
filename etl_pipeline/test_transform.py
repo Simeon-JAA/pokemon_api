@@ -141,3 +141,23 @@ def test_filter_ability_name_returns_name_chinese(mock_names_en_sp_fr_zh):
     result = filter_ability_name(mock_names_en_sp_fr_zh, "zh")
 
     assert "mock ability name (chinese)" in result["name"]
+
+
+def test_set_abilities_language_base_case_1(mock_extracted_pokemon_data):
+    """Tests abilities is returned containing only english entries"""
+
+    result = set_abilities_language(mock_extracted_pokemon_data)
+
+    pokemon_abilities_filtered = result["abilities"]
+
+    for ability in pokemon_abilities_filtered:
+
+        for effect_entry in ability["effect_entries"]:
+
+            assert 'english' in effect_entry["effect"]
+
+        for flavor_text_entry in ability["flavor_text_entries"]:
+
+            assert 'english' in flavor_text_entry["flavor_text"]
+
+        assert "english" in ability["names"]["name"]
