@@ -13,6 +13,4 @@ if __name__ == "__main__":
 
         pokemon_data_transformed = transform_pokemon_data(pokemon_data)
 
-        print(pokemon_data)
-
         break

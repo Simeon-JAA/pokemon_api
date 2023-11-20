@@ -44,19 +44,39 @@ def filter_ability_name(all_ability_names: list[dict], language: str = 'en') -> 
 
 
 def set_abilities_language(pokemon_data: dict, language: str = 'en') -> dict:
-    """Returns the pokemon abilities with the specified language entries only"""
+    """Returns the pokemon data with abilities section filtered
+     to contain entries of the specified language"""
 
     for ability in pokemon_data["abilities"]:
 
         flavor_text = ability["flavor_text_entries"]
         ability["flavor_text_entries"] = filter_flavor_text_entries(
-            flavor_text)
+            flavor_text, language)
 
         effect_entries = ability["effect_entries"]
-        ability["effect_entries"] = filter_effect_entries(effect_entries)
+        ability["effect_entries"] = filter_effect_entries(
+            effect_entries, language)
 
         ability_names = ability["names"]
-        ability["names"] = filter_ability_name(ability_names)
+        ability["names"] = filter_ability_name(ability_names, language)
+
+    return pokemon_data
+
+
+def set_moves_language(pokemon_data: dict, language: str = 'en') -> dict:
+    """Returns the pokemon data with moves section filtered
+     to contain entries of the specified language"""
+
+    for move in pokemon_data["moves"]:
+
+        flavor_text = move["flavor_text_entries"]
+        move["flavor_text_entries"] = filter_flavor_text_entries(
+            flavor_text, "en")
+
+        move["damage_class"] = move["damage_class"]["name"]
+
+        names = move["names"]
+        move["names"] = filter_ability_name(names, "en")
 
     return pokemon_data
 
@@ -65,6 +85,8 @@ def transform_pokemon_data(pokemon_data: dict) -> dict:
     """Transforms pokemon data for loading stage"""
 
     pokemon_data = set_abilities_language(pokemon_data, 'en')
+
+    pokemon_data = set_moves_language(pokemon_data, 'en')
 
     return pokemon_data
 
