@@ -145,8 +145,6 @@ def extract_single_pokemon(url: str) -> None:
     pokemon_moves = get_pokemon_moves(data)
     pokemon_data_to_transform["moves"] = pokemon_moves
 
-    print(pokemon_moves)
-
     return pokemon_data_to_transform
 
 
