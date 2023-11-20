@@ -22,22 +22,24 @@ CREATE TABLE user_pokemon (
 CREATE TABLE pokemon_stats (
     pokemon_stats_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     pokemon_id SMALLINT UNIQUE NOT NULL,
-    health SMALLINT NOT NULL,
+    hp SMALLINT NOT NULL,
     attack SMALLINT NOT NULL,
     defense SMALLINT NOT NULL,
+    speed SMALLINT NOT NULL,
     special_attack SMALLINT NOT NULL,
     special_defense SMALLINT NOT NULL,
-    pokemon_height SMALLINT NOT NULL,
+    height SMALLINT NOT NULL,
     pokemon_weight SMALLINT NOT NULL,
     PRIMARY KEY (pokemon_stats_id),
     FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id),
     CONSTRAINT check_attack CHECK (attack >= 0 AND attack <= 504),
     CONSTRAINT check_defense CHECK (defense >= 0 AND defense <= 504),
+    CONSTRAINT check_speed CHECK (speed >= 0 AND speed <= 504),
     CONSTRAINT check_special_attack CHECK (special_attack >= 0 AND special_attack <= 504),
     CONSTRAINT check_special_defense CHECK (special_defense >= 0 AND special_defense <= 504),
-    CONSTRAINT check_health CHECK (health >= 0 AND health <= 255),
-    CONSTRAINT check_height CHECK (pokemon_height > 0),
-    CONSTRAINT check_weight CHECK (pokemon_weight > 0)
+    CONSTRAINT check_hp CHECK (hp >= 0 AND hp <= 255),
+    CONSTRAINT check_height CHECK (height > 0),
+    CONSTRAINT check_pokemon_weight CHECK (pokemon_weight > 0)
 );
 
 CREATE TABLE pokemon_types (
@@ -46,6 +48,21 @@ CREATE TABLE pokemon_types (
     pokemon_type TEXT NOT NULL, --potentially make an ENUM TYPE
     PRIMARY KEY (pokemon_types_id),
     FOREIGN KEY (pokemon_id) REFERENCES pokemon_stats(pokemon_id)
+);
+
+CREATE TABLE pokemon_abilities (
+    pokemon_ability_id INT GENERATED ALWAYS AS IDENTITY,
+    ability_name TEXT NOT NULL,
+    PRIMARY KEY (pokemon_ability_id)
+);
+
+CREATE TABLE pokemon_abilities_flavor_text (
+    pokemon_abilities_flavor_text_id INT GENERATED ALWAYS AS IDENTITY,
+    pokemon_ability_id INT NOT NULL,
+    flavor_text TEXT NOT NULL,
+    version_group TEXT NOT NULL, -- possibly make ENUM?
+    PRIMARY KEY (pokemon_abilities_flavor_text_id),
+    FOREIGN KEY (pokemon_ability_id) REFERENCES pokemon_abilities (pokemon_ability_id)
 );
 
 CREATE SCHEMA example;
@@ -72,20 +89,22 @@ CREATE TABLE pokemon_stats (
     pokemon_id SMALLINT UNIQUE NOT NULL,
     attack SMALLINT NOT NULL,
     defense SMALLINT NOT NULL,
+    speed SMALLINT NOT NULL,
     special_attack SMALLINT NOT NULL,
     special_defense SMALLINT NOT NULL,
-    health SMALLINT NOT NULL,
-    pokemon_height SMALLINT NOT NULL,
+    hp SMALLINT NOT NULL,
+    height SMALLINT NOT NULL,
     pokemon_weight SMALLINT NOT NULL,
     PRIMARY KEY (pokemon_stats_id),
     FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id),
     CONSTRAINT check_attack CHECK (attack >= 0 AND attack <= 504),
     CONSTRAINT check_defense CHECK (defense >= 0 AND defense <= 504),
+    CONSTRAINT check_speed CHECK (speed >= 0 AND speed <= 504),
     CONSTRAINT check_special_attack CHECK (special_attack >= 0 AND special_attack <= 504),
     CONSTRAINT check_special_defense CHECK (special_defense >= 0 AND special_defense <= 504),
-    CONSTRAINT check_health CHECK (health >= 0 AND health <= 255),     
-    CONSTRAINT check_height CHECK (pokemon_height > 0),
-    CONSTRAINT check_weight CHECK (pokemon_weight > 0)
+    CONSTRAINT check_hp CHECK (hp >= 0 AND hp <= 255),     
+    CONSTRAINT check_height CHECK (height > 0),
+    CONSTRAINT check_pokemon_weight CHECK (pokemon_weight > 0)
 );
 
 CREATE TABLE pokemon_types (
@@ -112,15 +131,15 @@ VALUES
  RETURNING *;
 
 INSERT INTO pokemon_stats 
-(pokemon_id, attack, defense,
-special_attack, special_defense, health, pokemon_height, pokemon_weight)
+(pokemon_id, attack, defense, speed,
+special_attack, special_defense, hp, height, pokemon_weight)
 VALUES 
-(1, 20, 20, 20, 20, 100, 5, 100),
-(2, 30, 50, 20, 20, 255, 100, 1500),
-(3, 10, 5, 20, 20, 50, 2, 77),
-(4, 17, 10, 20, 20, 10, 9, 120),
-(5, 20, 20, 20, 20, 100, 5, 100),
-(6, 200, 200, 20, 20, 255, 120, 2000)
+(1, 20, 20, 50, 20, 20, 100, 5, 100),
+(2, 30, 50, 50, 20, 20, 255, 100, 1500),
+(3, 10, 5, 50, 20, 20, 50, 2, 77),
+(4, 17, 10, 50, 20, 20, 10, 9, 120),
+(5, 20, 20, 50, 20, 20, 100, 5, 100),
+(6, 200, 200, 50, 20, 20, 255, 120, 2000)
 RETURNING *; 
 
 INSERT INTO pokemon_types
