@@ -30,14 +30,14 @@ def filter_effect_entries(all_effect_entries: list[dict], language: str = 'en') 
     return effect_entries_filtered
 
 
-def filter_ability_name(all_ability_names: list[dict], language: str = 'en') -> dict:
+def filter_name_entries(all_name_entries: list[dict], language: str = 'en') -> dict:
     """Returns ability name for the specified language provided"""
 
     desired_ability_keys = {"name"}
 
     ability_names_filtered = [dict((k, v) for k, v in x.items()
                                    if k in desired_ability_keys)
-                              for x in all_ability_names
+                              for x in all_name_entries
                               if x["language"]["name"] == language.lower()]
 
     return ability_names_filtered[0]
@@ -58,7 +58,7 @@ def set_abilities_language(pokemon_data: dict, language: str = 'en') -> dict:
             effect_entries, language)
 
         ability_names = ability["names"]
-        ability["names"] = filter_ability_name(ability_names, language)
+        ability["names"] = filter_name_entries(ability_names, language)
 
     return pokemon_data
 
@@ -76,7 +76,7 @@ def set_moves_language(pokemon_data: dict, language: str = 'en') -> dict:
         move["damage_class"] = move["damage_class"]["name"]
 
         names = move["names"]
-        move["names"] = filter_ability_name(names, "en")
+        move["names"] = filter_name_entries(names, "en")
 
     return pokemon_data
 
