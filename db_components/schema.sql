@@ -47,22 +47,57 @@ CREATE TABLE pokemon_types (
     pokemon_id INT UNIQUE NOT NULL,
     pokemon_type TEXT NOT NULL, --potentially make an ENUM TYPE
     PRIMARY KEY (pokemon_types_id),
-    FOREIGN KEY (pokemon_id) REFERENCES pokemon_stats(pokemon_id)
+    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id)
 );
 
-CREATE TABLE pokemon_abilities (
-    pokemon_ability_id INT GENERATED ALWAYS AS IDENTITY,
+CREATE TABLE pokemon_ability (
+    pokemon_ability_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_id SMALLINT NOT NULL,
     ability_name TEXT NOT NULL,
-    PRIMARY KEY (pokemon_ability_id)
+    PRIMARY KEY (pokemon_ability_id),
+    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id)
 );
 
 CREATE TABLE pokemon_abilities_flavor_text (
     pokemon_abilities_flavor_text_id INT GENERATED ALWAYS AS IDENTITY,
-    pokemon_ability_id INT NOT NULL,
+    pokemon_ability_id SMALLINT NOT NULL,
     flavor_text TEXT NOT NULL,
     version_group TEXT NOT NULL, -- possibly make ENUM?
     PRIMARY KEY (pokemon_abilities_flavor_text_id),
-    FOREIGN KEY (pokemon_ability_id) REFERENCES pokemon_abilities (pokemon_ability_id)
+    FOREIGN KEY (pokemon_ability_id) REFERENCES pokemon_ability (pokemon_ability_id)
+);
+
+CREATE TABLE pokemon_abilities_effect_entry (
+    pokemon_abilities_effect_entries_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_ability_id SMALLINT NOT NULL, 
+    effect TEXT NOT NULL,
+    short_effect TEXT NOT NULL,
+    PRIMARY KEY (pokemon_abilities_effect_entries_id),
+    FOREIGN KEY (pokemon_ability_id) REFERENCES pokemon_ability (pokemon_ability_id)
+);
+
+CREATE TABLE pokemon_move (
+    pokemon_move_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_id SMALLINT NOT NULL,
+    move_name TEXT NOT NULL,
+    damage_class TEXT NOT NULL, --could make an ENUM?
+    accuracy SMALLINT NOT NULL,
+    power SMALLINT NOT NULL,
+    pokemon_priority SMALLINT NOT NULL,
+    PRIMARY KEY (pokemon_move_id),
+    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id),
+    CONSTRAINT check_accuracy CHECK (accuracy >= 0 AND accuracy <= 100),
+    CONSTRAINT check_power CHECK (power >= 0 AND power <= 100),
+    CONSTRAINT check_pokemon_priority CHECK (pokemon_priority >= 0)
+);
+
+CREATE TABLE pokemon_move_flavor_text (
+    pokemon_move_flavor_text_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_move_id SMALLINT NOT NULL,
+    flavor_text TEXT NOT NULL,
+    version_group TEXT NOT NULL, --possible make enum
+    PRIMARY KEY (pokemon_move_flavor_text_id),
+    FOREIGN KEY (pokemon_move_id) REFERENCES pokemon_move (pokemon_move_id)
 );
 
 CREATE SCHEMA example;
@@ -112,7 +147,57 @@ CREATE TABLE pokemon_types (
     pokemon_id INT UNIQUE NOT NULL,
     pokemon_type TEXT NOT NULL,
     PRIMARY KEY (pokemon_types_id),
-    FOREIGN KEY (pokemon_id) REFERENCES pokemon_stats(pokemon_id)
+    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id)
+);
+
+CREATE TABLE pokemon_ability (
+    pokemon_ability_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_id SMALLINT NOT NULL,
+    ability_name TEXT NOT NULL,
+    PRIMARY KEY (pokemon_ability_id),
+    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id)
+);
+
+CREATE TABLE pokemon_abilities_flavor_text (
+    pokemon_abilities_flavor_text_id INT GENERATED ALWAYS AS IDENTITY,
+    pokemon_ability_id SMALLINT NOT NULL,
+    flavor_text TEXT NOT NULL,
+    version_group TEXT NOT NULL, -- possibly make ENUM?
+    PRIMARY KEY (pokemon_abilities_flavor_text_id),
+    FOREIGN KEY (pokemon_ability_id) REFERENCES pokemon_ability (pokemon_ability_id)
+);
+
+CREATE TABLE pokemon_abilities_effect_entry (
+    pokemon_abilities_effect_entries_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_ability_id SMALLINT NOT NULL, 
+    effect TEXT NOT NULL,
+    short_effect TEXT NOT NULL,
+    PRIMARY KEY (pokemon_abilities_effect_entries_id),
+    FOREIGN KEY (pokemon_ability_id) REFERENCES pokemon_ability (pokemon_ability_id)
+);
+
+CREATE TABLE pokemon_move (
+    pokemon_move_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_id SMALLINT NOT NULL,
+    move_name TEXT NOT NULL,
+    damage_class TEXT NOT NULL, --could make an ENUM?
+    accuracy SMALLINT NOT NULL,
+    power SMALLINT NOT NULL,
+    pokemon_priority SMALLINT NOT NULL,
+    PRIMARY KEY (pokemon_move_id),
+    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id),
+    CONSTRAINT check_accuracy CHECK (accuracy >= 0 AND accuracy <= 100),
+    CONSTRAINT check_power CHECK (power >= 0 AND power <= 100),
+    CONSTRAINT check_pokemon_priority CHECK (pokemon_priority >= 0)
+);
+
+CREATE TABLE pokemon_move_flavor_text (
+    pokemon_move_flavor_text_id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    pokemon_move_id SMALLINT NOT NULL,
+    flavor_text TEXT NOT NULL,
+    version_group TEXT NOT NULL, --possible make enum
+    PRIMARY KEY (pokemon_move_flavor_text_id),
+    FOREIGN KEY (pokemon_move_id) REFERENCES pokemon_move (pokemon_move_id)
 );
 
 INSERT INTO api_user 
