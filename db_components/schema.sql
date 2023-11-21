@@ -4,19 +4,11 @@ CREATE DATABASE pokemon_api;
 
 \c pokemon_api;
 
-CREATE TABLE api_user (
-    user_id SMALLINT GENERATED ALWAYS AS IDENTITY,
-    user_name TEXT NOT NULL,
-    PRIMARY KEY (user_name), 
-    CONSTRAINT check_user_name CHECK (LENGTH(user_name) > 4 AND LENGTH(user_name) < 20)
-);
-
-CREATE TABLE user_pokemon (
-    user_pokemon_id SMALLINT GENERATED ALWAYS AS IDENTITY,
-    user_id SMALLINT NOT NULL,
+CREATE TABLE pokemon (
+    pokemon_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     pokemon_name TEXT NOT NULL,
     in_current_team BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (user_pokemon_id)
+    PRIMARY KEY (pokemon_id)
 );
 
 CREATE TABLE pokemon_stats (
@@ -31,7 +23,7 @@ CREATE TABLE pokemon_stats (
     height SMALLINT NOT NULL,
     pokemon_weight SMALLINT NOT NULL,
     PRIMARY KEY (pokemon_stats_id),
-    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id),
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon (pokemon_id),
     CONSTRAINT check_attack CHECK (attack >= 0 AND attack <= 504),
     CONSTRAINT check_defense CHECK (defense >= 0 AND defense <= 504),
     CONSTRAINT check_speed CHECK (speed >= 0 AND speed <= 504),
@@ -47,7 +39,7 @@ CREATE TABLE pokemon_types (
     pokemon_id INT UNIQUE NOT NULL,
     pokemon_type TEXT NOT NULL, --potentially make an ENUM TYPE
     PRIMARY KEY (pokemon_types_id),
-    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id)
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon (pokemon_id)
 );
 
 CREATE TABLE pokemon_ability (
@@ -55,7 +47,7 @@ CREATE TABLE pokemon_ability (
     pokemon_id SMALLINT NOT NULL,
     ability_name TEXT NOT NULL,
     PRIMARY KEY (pokemon_ability_id),
-    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id)
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon (pokemon_id)
 );
 
 CREATE TABLE pokemon_abilities_flavor_text (
@@ -85,7 +77,7 @@ CREATE TABLE pokemon_move (
     power SMALLINT NOT NULL,
     pokemon_priority SMALLINT NOT NULL,
     PRIMARY KEY (pokemon_move_id),
-    FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id),
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon (pokemon_id),
     CONSTRAINT check_accuracy CHECK (accuracy >= 0 AND accuracy <= 100),
     CONSTRAINT check_power CHECK (power >= 0 AND power <= 100),
     CONSTRAINT check_pokemon_priority CHECK (pokemon_priority >= 0)
