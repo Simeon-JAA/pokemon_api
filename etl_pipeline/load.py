@@ -99,7 +99,7 @@ def insert_into_pokemon_types_table(conn: connection, pokemon_data: dict, pokemo
     conn.commit()
 
 
-def insert_into_pokemon_abilities_flavor_text(conn: connection, cur: cursor, flavor_text_entries: dict, ability_id: int) -> None:
+def insert_into_pokemon_abilities_flavor_text_table(conn: connection, cur: cursor, flavor_text_entries: dict, ability_id: int) -> None:
     """Inserts into pokemon_abilities_flavor_text table"""
 
     for flavor_text in flavor_text_entries:
@@ -113,8 +113,24 @@ def insert_into_pokemon_abilities_flavor_text(conn: connection, cur: cursor, fla
     conn.commit()
 
 
-def insert_into_pokemon_ability_table(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
-    """Inserts into pokemon ability table"""
+def insert_into_pokemon_abilities_effect_entry_table(conn: connection, cur: cursor, effect_entries: dict, ability_id: int) -> None:
+    """Inserts into pokemon_abilities_effect_entry table"""
+
+    for effect in effect_entries:
+
+        cur.execute(f"""INSERT INTO pokemon_abilities_effect_entry
+                        (pokemon_ability_id, effect, short_effect)
+                        VALUES
+                        (%s, %s, %s) RETURNING*;""",
+                    [ability_id, effect["effect"], effect["short_effect"]])
+
+        print(cur.fetchall())
+
+    conn.commit()
+
+
+def insert_pokemon_ability_information(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
+    """Inserts all pokemon ability information into relevant tables"""
 
     pokemon_abilities = pokemon_data["abilities"]
 
@@ -133,10 +149,13 @@ def insert_into_pokemon_ability_table(conn: connection, pokemon_data: dict, poke
         ability_id = cur.fetchall()[0]["pokemon_ability_id"]
 
         ability_flavor_text_entries = ability["flavor_text_entries"]
+        ability_effect_entries = ability["effect_entries"]
 
-        insert_into_pokemon_abilities_flavor_text(
+        insert_into_pokemon_abilities_flavor_text_table(
             conn, cur, ability_flavor_text_entries, ability_id)
 
+        insert_into_pokemon_abilities_effect_entry_table(
+            conn, cur, ability_effect_entries, ability_id)
         conn.commit()
 
     cur.close()
@@ -149,7 +168,7 @@ def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
         pokemon_id = insert_into_pokemon_table(conn, pokemon_data)
         insert_into_pokemon_stats_table(conn, pokemon_data, pokemon_id)
         insert_into_pokemon_types_table(conn, pokemon_data, pokemon_id)
-        insert_into_pokemon_ability_table(conn, pokemon_data, pokemon_id)
+        insert_pokemon_ability_information(conn, pokemon_data, pokemon_id)
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
         conn_err("Error: Connection unsuccessful with the database!")
