@@ -81,12 +81,22 @@ def set_moves_language(pokemon_data: dict, language: str = 'en') -> dict:
     return pokemon_data
 
 
+def capitalize_pokemon_name(pokemon_data: dict) -> dict:
+    """Capitalizes pokemon name and returns data"""
+
+    pokemon_data["name"] = pokemon_data["name"].capitalize()
+
+    return pokemon_data
+
+
 def transform_pokemon_data(pokemon_data: dict) -> dict:
     """Transforms pokemon data for loading stage"""
 
     pokemon_data = set_abilities_language(pokemon_data, 'en')
 
     pokemon_data = set_moves_language(pokemon_data, 'en')
+
+    pokemon_data = capitalize_pokemon_name(pokemon_data)
 
     return pokemon_data
 
