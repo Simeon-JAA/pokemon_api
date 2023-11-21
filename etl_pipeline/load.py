@@ -74,12 +74,38 @@ def insert_into_pokemon_stats_table(conn: connection, pokemon_data: dict, pokemo
     conn.commit()
 
 
+def insert_into_pokemon_types_table(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
+    """Inserts into the pokemon types table"""
+
+    pokemon_types = pokemon_data["stats"]["types"]
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    for type in pokemon_types:
+
+        try:
+            cur.execute("""INSERT INTO pokemon_types
+                        (pokemon_id, pokemon_type)
+                        VALUES
+                        (%s, %s)
+                        RETURNING *;""",
+                        [pokemon_id, type.capitalize()])
+        except:
+            ConnectionError(
+                "Error: Unsuccessful connection established to database!")
+
+    cur.close()
+
+    conn.commit()
+
+
 def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
     """Loads one pokemon into the postgres database"""
 
     try:
         pokemon_id = insert_into_pokemon_table(conn, pokemon_data)
         insert_into_pokemon_stats_table(conn, pokemon_data, pokemon_id)
+        insert_into_pokemon_types_table(conn, pokemon_data, pokemon_id)
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
         conn_err("Error: Connection unsuccessful with the database!")
