@@ -36,7 +36,7 @@ CREATE TABLE pokemon_stats (
 
 CREATE TABLE pokemon_types (
     pokemon_types_id INT GENERATED ALWAYS AS IDENTITY,
-    pokemon_id INT UNIQUE NOT NULL,
+    pokemon_id INT NOT NULL,
     pokemon_type TEXT NOT NULL, --potentially make an ENUM TYPE
     PRIMARY KEY (pokemon_types_id),
     FOREIGN KEY (pokemon_id) REFERENCES pokemon (pokemon_id)
@@ -136,7 +136,7 @@ CREATE TABLE pokemon_stats (
 
 CREATE TABLE pokemon_types (
     pokemon_types_id INT GENERATED ALWAYS AS IDENTITY,
-    pokemon_id INT UNIQUE NOT NULL,
+    pokemon_id INT NOT NULL,
     pokemon_type TEXT NOT NULL,
     PRIMARY KEY (pokemon_types_id),
     FOREIGN KEY (pokemon_id) REFERENCES user_pokemon (user_pokemon_id)
