@@ -5,7 +5,7 @@ from os import environ
 from dotenv import load_dotenv
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor
-from psycopg2.extensions import connection
+from psycopg2.extensions import connection, cursor
 
 
 def get_db_connection(config: dict) -> connection:
@@ -99,6 +99,49 @@ def insert_into_pokemon_types_table(conn: connection, pokemon_data: dict, pokemo
     conn.commit()
 
 
+def insert_into_pokemon_abilities_flavor_text(conn: connection, cur: cursor, flavor_text_entries: dict, ability_id: int) -> None:
+    """Inserts into pokemon_abilities_flavor_text table"""
+
+    for flavor_text in flavor_text_entries:
+
+        cur.execute(f"""INSERT INTO pokemon_abilities_flavor_text
+                        (pokemon_ability_id, flavor_text, version_group)
+                        VALUES
+                        (%s, %s, %s) RETURNING*;""",
+                    [ability_id, flavor_text["flavor_text"], flavor_text["version_group"]])
+
+    conn.commit()
+
+
+def insert_into_pokemon_ability_table(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
+    """Inserts into pokemon ability table"""
+
+    pokemon_abilities = pokemon_data["abilities"]
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    for ability in pokemon_abilities:
+
+        ability_name = ability["names"]["name"]
+
+        cur.execute(f"""INSERT INTO pokemon_ability
+                (pokemon_id, ability_name)
+                VALUES
+                (%s, %s) RETURNING*;""",
+                    [pokemon_id, ability_name.capitalize()])
+
+        ability_id = cur.fetchall()[0]["pokemon_ability_id"]
+
+        ability_flavor_text_entries = ability["flavor_text_entries"]
+
+        insert_into_pokemon_abilities_flavor_text(
+            conn, cur, ability_flavor_text_entries, ability_id)
+
+        conn.commit()
+
+    cur.close()
+
+
 def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
     """Loads one pokemon into the postgres database"""
 
@@ -106,6 +149,7 @@ def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
         pokemon_id = insert_into_pokemon_table(conn, pokemon_data)
         insert_into_pokemon_stats_table(conn, pokemon_data, pokemon_id)
         insert_into_pokemon_types_table(conn, pokemon_data, pokemon_id)
+        insert_into_pokemon_ability_table(conn, pokemon_data, pokemon_id)
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
         conn_err("Error: Connection unsuccessful with the database!")
