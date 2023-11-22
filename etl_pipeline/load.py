@@ -124,8 +124,6 @@ def insert_into_pokemon_abilities_effect_entry_table(conn: connection, cur: curs
                         (%s, %s, %s) RETURNING*;""",
                     [ability_id, effect["effect"], effect["short_effect"]])
 
-        print(cur.fetchall())
-
     conn.commit()
 
 
@@ -159,6 +157,14 @@ def insert_pokemon_ability_information(conn: connection, pokemon_data: dict, pok
         conn.commit()
 
     cur.close()
+
+
+def insert_into_pokemon_moves_table(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
+    """Inserts into the pokemon moves table"""
+
+    pokemon_moves = pokemon_data["moves"]
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
 
 
 def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
