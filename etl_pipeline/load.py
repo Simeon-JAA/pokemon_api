@@ -159,12 +159,43 @@ def insert_pokemon_ability_information(conn: connection, pokemon_data: dict, pok
     cur.close()
 
 
+# TODO finish inserting into pokemon_moves
 def insert_into_pokemon_moves_table(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
     """Inserts into the pokemon moves table"""
 
     pokemon_moves = pokemon_data["moves"]
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    for move in pokemon_moves:
+
+        move_flavor_text_entries = move["flavor_text_entries"]
+
+        cur.execute(f"""INSERT INTO pokemon_move
+                    (pokemon_id, move_name, power, 
+                    accuracy, damage_class, pokemon_priority)
+                    VALUES
+                    (%s, %s, %s, %s, %s, %s) RETURNING pokemon_move_id;""",
+                    [pokemon_id, move["names"]["name"],
+                     move["power"], move["accuracy"], move["damage_class"],
+                     move["priority"]])
+
+        conn.commit()
+
+        move_id = cur.fetchall()[0]["pokemon_move_id"]
+
+        for flavor_text_entry in move_flavor_text_entries:
+
+            cur.execute(f"""INSERT INTO pokemon_move_flavor_text
+                        (pokemon_move_id, flavor_text, version_group)
+                        VALUES
+                        () RETURNING*;""",
+                        [move_id, flavor_text_entry["flavor_text"],
+                         flavor_text_entry["version_group"]])
+
+            conn.commit()
+
+    # cur.close()
 
 
 def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
@@ -175,6 +206,7 @@ def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
         insert_into_pokemon_stats_table(conn, pokemon_data, pokemon_id)
         insert_into_pokemon_types_table(conn, pokemon_data, pokemon_id)
         insert_pokemon_ability_information(conn, pokemon_data, pokemon_id)
+        insert_into_pokemon_moves_table(conn, pokemon_data, pokemon_id)
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
         conn_err("Error: Connection unsuccessful with the database!")
