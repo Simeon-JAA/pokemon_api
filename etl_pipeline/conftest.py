@@ -260,7 +260,7 @@ def mock_names_en_sp_fr_zh() -> list[dict]:
 
 
 @pytest.fixture
-def mock_config_environemnt() -> dict:
+def mock_config_environment() -> dict:
     """Mocks the envioromnent file"""
 
     return {
