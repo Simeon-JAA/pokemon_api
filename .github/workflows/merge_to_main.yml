@@ -1,4 +1,4 @@
-name: "merging_with_main"
+name: "merge_to_main"
 
 on:
   pull_request:
