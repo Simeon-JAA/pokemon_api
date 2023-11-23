@@ -266,7 +266,7 @@ def mock_config_environment() -> dict:
     return {
         'USER': 'mock_user',
         'PASSWORD': 'mock_password',
-        'DB_NAME': 'mock_db_name',
+        'DBNAME': 'mock_db_name',
         'PORT': 'mock_port',
         'HOST': 'mock_host'
     }
