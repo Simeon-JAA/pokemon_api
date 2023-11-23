@@ -257,3 +257,16 @@ def mock_names_en_sp_fr_zh() -> list[dict]:
         {'language': {'name': 'zh', 'url': 'mock language url'},
          'name': 'mock ability name (chinese) 4'},
     ]
+
+
+@pytest.fixture
+def mock_config_environemnt() -> dict:
+    """Mocks the envioromnent file"""
+
+    return {
+        'USER': 'mock_user',
+        'PASSWORD': 'mock_password',
+        'DB_NAME': 'mock_db_name',
+        'PORT': 'mock_port',
+        'HOST': 'mock_host'
+    }
