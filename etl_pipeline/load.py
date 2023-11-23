@@ -159,7 +159,23 @@ def insert_pokemon_ability_information(conn: connection, pokemon_data: dict, pok
     cur.close()
 
 
-# TODO finish inserting into pokemon_moves
+def insert_into_pokemon_move_flavor_text_table(conn: connection, cur: cursor, move_id: int, flavor_text_entries: list[dict]) -> None:
+    """Inserts pokemon flavor text into table"""
+
+    for flavor_text_entry in flavor_text_entries:
+
+        cur.execute(f"""INSERT INTO pokemon_move_flavor_text
+                    (pokemon_move_id, flavor_text, version_group)
+                    VALUES
+                    (%s, %s, %s) RETURNING*;""",
+                    [move_id, flavor_text_entry["flavor_text"],
+                        flavor_text_entry["version_group"]])
+
+        conn.commit()
+
+        print(cur.fetchall())
+
+
 def insert_into_pokemon_moves_table(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
     """Inserts into the pokemon moves table"""
 
@@ -168,8 +184,6 @@ def insert_into_pokemon_moves_table(conn: connection, pokemon_data: dict, pokemo
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
     for move in pokemon_moves:
-
-        move_flavor_text_entries = move["flavor_text_entries"]
 
         cur.execute(f"""INSERT INTO pokemon_move
                     (pokemon_id, move_name, power, 
@@ -183,17 +197,10 @@ def insert_into_pokemon_moves_table(conn: connection, pokemon_data: dict, pokemo
         conn.commit()
 
         move_id = cur.fetchall()[0]["pokemon_move_id"]
+        move_flavor_text_entries = move["flavor_text_entries"]
 
-        for flavor_text_entry in move_flavor_text_entries:
-
-            cur.execute(f"""INSERT INTO pokemon_move_flavor_text
-                        (pokemon_move_id, flavor_text, version_group)
-                        VALUES
-                        () RETURNING*;""",
-                        [move_id, flavor_text_entry["flavor_text"],
-                         flavor_text_entry["version_group"]])
-
-            conn.commit()
+        insert_into_pokemon_move_flavor_text_table(
+            conn, cur, move_id, move_flavor_text_entries)
 
     # cur.close()
 
