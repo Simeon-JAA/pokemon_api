@@ -33,14 +33,12 @@ def insert_into_pokemon_table(conn: connection, pokemon_data: dict) -> int:
         cur.execute(f"""INSERT INTO pokemon
                 (pokemon_name)
                 VALUES
-                (%s) RETURNING*;""",
+                (%s) RETURNING pokemon_id;""",
                     [pokemon_name])
     except:
         ConnectionError("Error: Connection to insert data unsuccessful!")
 
-    pokemon_insert_data = cur.fetchall()
-
-    pokemon_id = pokemon_insert_data[0]["pokemon_id"]
+    pokemon_id = cur.fetchall()[0]["pokemon_id"]
 
     cur.close()
 
@@ -61,7 +59,7 @@ def insert_into_pokemon_stats_table(conn: connection, pokemon_data: dict, pokemo
                 (pokemon_id, hp, attack, defense, speed, 
                 special_attack, special_defense, height, pokemon_weight)
                 VALUES
-                (%s, %s, %s, %s, %s, %s, %s, %s, %s)RETURNING*;""",
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s);""",
                     [pokemon_id, pokemon_stats["hp"], pokemon_stats["attack"],
                      pokemon_stats["defense"], pokemon_stats["speed"], pokemon_stats["special-attack"],
                      pokemon_stats["special-defense"], pokemon_stats["height"], pokemon_stats["weight"]])
@@ -87,8 +85,7 @@ def insert_into_pokemon_types_table(conn: connection, pokemon_data: dict, pokemo
             cur.execute("""INSERT INTO pokemon_types
                         (pokemon_id, pokemon_type)
                         VALUES
-                        (%s, %s)
-                        RETURNING *;""",
+                        (%s, %s);""",
                         [pokemon_id, type.capitalize()])
         except:
             ConnectionError(
@@ -107,7 +104,7 @@ def insert_into_pokemon_abilities_flavor_text_table(conn: connection, cur: curso
         cur.execute(f"""INSERT INTO pokemon_abilities_flavor_text
                         (pokemon_ability_id, flavor_text, version_group)
                         VALUES
-                        (%s, %s, %s) RETURNING*;""",
+                        (%s, %s, %s);""",
                     [ability_id, flavor_text["flavor_text"], flavor_text["version_group"]])
 
     conn.commit()
@@ -121,7 +118,7 @@ def insert_into_pokemon_abilities_effect_entry_table(conn: connection, cur: curs
         cur.execute(f"""INSERT INTO pokemon_abilities_effect_entry
                         (pokemon_ability_id, effect, short_effect)
                         VALUES
-                        (%s, %s, %s) RETURNING*;""",
+                        (%s, %s, %s);""",
                     [ability_id, effect["effect"], effect["short_effect"]])
 
     conn.commit()
@@ -141,7 +138,7 @@ def insert_pokemon_ability_information(conn: connection, pokemon_data: dict, pok
         cur.execute(f"""INSERT INTO pokemon_ability
                 (pokemon_id, ability_name)
                 VALUES
-                (%s, %s) RETURNING*;""",
+                (%s, %s) RETURNING pokemon_ability_id;""",
                     [pokemon_id, ability_name.capitalize()])
 
         ability_id = cur.fetchall()[0]["pokemon_ability_id"]
@@ -154,6 +151,7 @@ def insert_pokemon_ability_information(conn: connection, pokemon_data: dict, pok
 
         insert_into_pokemon_abilities_effect_entry_table(
             conn, cur, ability_effect_entries, ability_id)
+
         conn.commit()
 
     cur.close()
@@ -167,13 +165,11 @@ def insert_into_pokemon_move_flavor_text_table(conn: connection, cur: cursor, mo
         cur.execute(f"""INSERT INTO pokemon_move_flavor_text
                     (pokemon_move_id, flavor_text, version_group)
                     VALUES
-                    (%s, %s, %s) RETURNING*;""",
+                    (%s, %s, %s);""",
                     [move_id, flavor_text_entry["flavor_text"],
                         flavor_text_entry["version_group"]])
 
         conn.commit()
-
-        print(cur.fetchall())
 
 
 def insert_into_pokemon_moves_table(conn: connection, pokemon_data: dict, pokemon_id: int) -> None:
@@ -202,7 +198,7 @@ def insert_into_pokemon_moves_table(conn: connection, pokemon_data: dict, pokemo
         insert_into_pokemon_move_flavor_text_table(
             conn, cur, move_id, move_flavor_text_entries)
 
-    # cur.close()
+    cur.close()
 
 
 def load_pokemon_into_db(conn: connection, pokemon_data: dict) -> None:
