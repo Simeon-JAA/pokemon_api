@@ -73,14 +73,11 @@ CREATE TABLE pokemon_move (
     pokemon_id SMALLINT NOT NULL,
     move_name TEXT NOT NULL,
     damage_class TEXT NOT NULL, --could make an ENUM?
-    accuracy SMALLINT NOT NULL,
-    power SMALLINT NOT NULL,
+    accuracy SMALLINT,
+    power SMALLINT,
     pokemon_priority SMALLINT NOT NULL,
     PRIMARY KEY (pokemon_move_id),
-    FOREIGN KEY (pokemon_id) REFERENCES pokemon (pokemon_id),
-    CONSTRAINT check_accuracy CHECK (accuracy >= 0 AND accuracy <= 100),
-    CONSTRAINT check_power CHECK (power >= 0 AND power <= 100),
-    CONSTRAINT check_pokemon_priority CHECK (pokemon_priority >= 0)
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon (pokemon_id)
 );
 
 CREATE TABLE pokemon_move_flavor_text (
