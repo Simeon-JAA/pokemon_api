@@ -5,7 +5,7 @@ My attempt to demonstrate some skills I have acquired while training and learnin
 
 The vision is that all relevant data is extracted from the API, loaded into a local postgres database. From this, a data visualisation tool such as streamlit can access the database to visually represent the data I have chosen to extract from the API.
 
-### ETL Pipieline
+### ETL Pipeline
 
 The ETL pipeline finds all URLs of the pokemon and extracts, cleans and polishes the data before moving into a local db.
 
