@@ -12,16 +12,7 @@ The ETL pipeline finds all URLs of the pokemon and extracts, cleans and polishes
 
 ### .env file
 
-You will need an environment file
-
-### Commands
-+ Run the commands below to successfully run the script (macOS) - assuming you have python installed on your device.
-
-Create a virtual environment
-
-```python3 -m venv venv```
-
-Activate the virtual environment file with the following variables for the script to work (locally in this current build)
+You will need an environment file with the following variables for this repository to work. I have listed below the variables and corresponding values to go in your .env file below:
 
 | Variable Name | Value |
 | - | - |
@@ -32,7 +23,16 @@ Activate the virtual environment file with the following variables for the scrip
 | HOST | localhost |
 
 
-```source activate venv```
+### Commands
++ Run the commands below to successfully run the script (macOS) - assuming you have python installed on your device.
+
+Create a virtual environment
+
+```python3 -m venv venv```
+
+Activate the virtual environment file with the following variables for the script to work (locally in this current build)
+
+```source venv/bin/activate```
 
 Install requirements for the scripts to run
 
