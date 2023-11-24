@@ -26,6 +26,4 @@ if __name__ == "__main__":
 
         load_pokemon_into_db(conn, pokemon_data)
 
-        break
-
     conn.close()
