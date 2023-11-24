@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from db_functions import get_db_connection
+from db_components.db_queries import get_db_connection
 
 
 @patch("db_functions.connect")
