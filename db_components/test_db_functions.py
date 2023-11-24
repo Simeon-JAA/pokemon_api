@@ -2,16 +2,26 @@
 
 from unittest.mock import patch
 
-from db_functions import get_user_id
-from psycopg2.extensions import connection
+from db_functions import get_db_connection
 
 
-@patch("db_functions.get_db_connection")
-def test_get_db_connection_returns_connection(mock_db_connection):
-    """Test for what should be returned given the function get_db_connection is successful"""
+@patch("db_functions.connect")
+def test_connect_is_called_in_get_db_connection(mock_connect, mock_config_environment):
+    """Tests that connect is called in mock_db_connection"""
 
-    mock_db_connection.return_value = connection
+    mock_connect.return_value = True
 
-    result = mock_db_connection()
+    get_db_connection(mock_config_environment)
 
-    assert result == connection
+    assert mock_connect.call_count == 1
+
+
+@patch("db_functions.connect")
+def test_connect_returns_correct_value_in_get_db_connection(mock_connect, mock_config_environment):
+    """Tests that connect returns correct value called in mock_db_connection"""
+
+    mock_connect.return_value = "mock_connection"
+
+    result = get_db_connection(mock_config_environment)
+
+    assert result == "mock_connection"
