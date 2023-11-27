@@ -3,6 +3,7 @@
 from os import environ
 
 import pandas as pd
+from pandas import DataFrame
 from dotenv import load_dotenv
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor
@@ -22,7 +23,7 @@ def get_db_connection(config: dict) -> connection:
     return conn
 
 
-def get_all_pokemon(conn: connection) -> dict:
+def get_all_pokemon(conn: connection) -> DataFrame:
     """Returns all pokemon from db"""
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -31,10 +32,10 @@ def get_all_pokemon(conn: connection) -> dict:
 
     all_pokemon_data = cur.fetchall()
 
-    print(pd.DataFrame(all_pokemon_data))
+    return pd.DataFrame(all_pokemon_data)
 
 
-def get_specific_pokemon(conn: connection, pokemon: str) -> dict:
+def get_specific_pokemon(conn: connection, pokemon: str) -> DataFrame:
     """Returns specified pokemon from db and displays
     pokemon, stats and types"""
 
@@ -50,12 +51,12 @@ def get_specific_pokemon(conn: connection, pokemon: str) -> dict:
                 WHERE pokemon_name = %s;""",
                 [pokemon.capitalize()])
 
-    pokemon_data = cur.fetchall()
+    specific_pokemon_data = cur.fetchall()
 
-    print(pd.DataFrame(pokemon_data))
+    return pd.DataFrame(specific_pokemon_data)
 
 
-def get_pokemon_moves(conn: connection, pokemon: str) -> dict:
+def get_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
     """Returns all moves of a pokemon"""
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -70,33 +71,35 @@ def get_pokemon_moves(conn: connection, pokemon: str) -> dict:
 
     pokemon_data = cur.fetchall()
 
-    print(pd.DataFrame(pokemon_data))
+    return pd.DataFrame(pokemon_data)
 
 
-# TODO split into two functions
-def get_pokemon_types_count(conn: connection, pokemon_type: str = None) -> dict:
-    """Returns the count of types of pokemon in the database
-    If a type argument has been provided, this will return the count
-    of that type specifically"""
+def get_pokemon_all_types_count(conn: connection) -> DataFrame:
+    """Returns the count of types of pokemon in the database"""
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    if pokemon_type == None:
-
-        cur.execute(f"""SELECT pokemon_type AS type,
+    cur.execute(f"""SELECT pokemon_type AS type,
                     COUNT(pokemon_type) AS count
                     FROM pokemon_types
                     GROUP BY type
                     ORDER BY count;""")
 
-    else:
+    pokemon_data = cur.fetchall()
 
-        cur.execute(f"""SELECT pokemon_type AS type,
+    return pd.DataFrame(pokemon_data)
+
+
+def get_pokemon_specific_types_count(conn: connection, pokemon_types_in_df: list[str], pokemon_types: list[str]) -> dict:
+    """Returns the count of specified_types in the db"""
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute(f"""SELECT pokemon_type AS type,
                     COUNT(pokemon_type) AS count
                     FROM pokemon_types
                     WHERE pokemon_type = %s
-                    GROUP BY type;""",
-                    [pokemon_type.capitalize()])
+                    GROUP BY type;""")
 
     pokemon_data = cur.fetchall()
 
@@ -104,7 +107,7 @@ def get_pokemon_types_count(conn: connection, pokemon_type: str = None) -> dict:
 
 
 # TODO remove limit on SQL statement
-def get_pokemon_by_type(conn: connection, pokemon_type: str) -> dict:
+def get_pokemon_by_type(conn: connection, pokemon_type: str) -> DataFrame:
     """Returns all pokemon of a specified type"""
 
     allowed_types = {"grass", "ground"}
@@ -124,7 +127,7 @@ def get_pokemon_by_type(conn: connection, pokemon_type: str) -> dict:
 
     pokemon_data = cur.fetchall()
 
-    print(pd.DataFrame(pokemon_data))
+    return pd.DataFrame(pokemon_data)
 
 
 if __name__ == "__main__":
@@ -140,7 +143,7 @@ if __name__ == "__main__":
     get_specific_pokemon(conn, "charmander")
     get_pokemon_by_type(conn, "ground")
     get_pokemon_moves(conn, "bulbasaur")
-    get_pokemon_types_count(conn)
-    get_pokemon_types_count(conn, "rock")
+    get_pokemon_all_types_count(conn)
+    get_pokemon_specific_types_count(conn, "rock")
 
     conn.close()
