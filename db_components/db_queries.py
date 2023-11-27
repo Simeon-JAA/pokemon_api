@@ -73,6 +73,36 @@ def get_pokemon_moves(conn: connection, pokemon: str) -> dict:
     print(pd.DataFrame(pokemon_data))
 
 
+# TODO split into two functions
+def get_pokemon_types_count(conn: connection, pokemon_type: str = None) -> dict:
+    """Returns the count of types of pokemon in the database
+    If a type argument has been provided, this will return the count
+    of that type specifically"""
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    if pokemon_type == None:
+
+        cur.execute(f"""SELECT pokemon_type AS type,
+                    COUNT(pokemon_type) AS count
+                    FROM pokemon_types
+                    GROUP BY type
+                    ORDER BY count;""")
+
+    else:
+
+        cur.execute(f"""SELECT pokemon_type AS type,
+                    COUNT(pokemon_type) AS count
+                    FROM pokemon_types
+                    WHERE pokemon_type = %s
+                    GROUP BY type;""",
+                    [pokemon_type.capitalize()])
+
+    pokemon_data = cur.fetchall()
+
+    print(pd.DataFrame(pokemon_data))
+
+
 # TODO remove limit on SQL statement
 def get_pokemon_by_type(conn: connection, pokemon_type: str) -> dict:
     """Returns all pokemon of a specified type"""
@@ -105,9 +135,12 @@ if __name__ == "__main__":
 
     conn = get_db_connection(config)
 
+    # An example section of code to see this works when run
     get_all_pokemon(conn)
     get_specific_pokemon(conn, "charmander")
     get_pokemon_by_type(conn, "ground")
     get_pokemon_moves(conn, "bulbasaur")
+    get_pokemon_types_count(conn)
+    get_pokemon_types_count(conn, "rock")
 
     conn.close()
