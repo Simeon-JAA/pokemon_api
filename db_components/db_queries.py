@@ -56,8 +56,8 @@ def get_specific_pokemon(conn: connection, pokemon: str) -> DataFrame:
     return pd.DataFrame(specific_pokemon_data)
 
 
-def get_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
-    """Returns all moves of a pokemon"""
+def get_specified_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
+    """Returns all moves of a specified pokemon"""
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -68,6 +68,42 @@ def get_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
                 ON p.pokemon_id = pm.pokemon_id
                 WHERE pokemon_name = %s;""",
                 [pokemon.capitalize()])
+
+    pokemon_data = cur.fetchall()
+
+    return pd.DataFrame(pokemon_data)
+
+
+# TODO merge SQL query to display move count, ability count & type count
+def get_all_pokemon_ability_count(conn: connection) -> DataFrame:
+    """Gets the ability count of all pokemon in the database"""
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT p.pokemon_name AS name,
+                COUNT(pa.pokemon_ability_id) AS ability_count
+                FROM pokemon AS p
+                JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
+                GROUP BY p.pokemon_name;""")
+
+    pokemon_ability_count_data = cur.fetchall()
+
+    return pd.DataFrame(pokemon_ability_count_data)
+
+
+# TODO finish sql query
+def get_all_pokemon_all_move_names(conn: connection) -> DataFrame:
+    """Returns list of all pokemon and all moves associated with that pokemon"""
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute(f"""SELECT p.pokemon_id AS id, p.pokemon_name AS name,
+                GROUP_CONCAT(pm.move_name SEPARATOR ',')
+                FROM pokemon AS p
+                JOIN pokemon_move AS pm
+                ON pm.pokemon_id = p.pokemon_id
+                WHERE pokemon_name = 'Squirtle'
+                GROUP BY p.pokemon_name;""")
 
     pokemon_data = cur.fetchall()
 
@@ -90,20 +126,36 @@ def get_pokemon_all_types_count(conn: connection) -> DataFrame:
     return pd.DataFrame(pokemon_data)
 
 
-def get_pokemon_specific_types_count(conn: connection, pokemon_types_in_df: list[str], pokemon_types: list[str]) -> dict:
+# TODO finish sql query
+def get_pokemon_specific_types_count(conn: connection, pokemon_types_in_db: set[str], pokemon_types: list[str]) -> DataFrame:
     """Returns the count of specified_types in the db"""
+
+    pokemon_types = list(map(
+        lambda pokemon_type: pokemon_type.capitalize(), pokemon_types))
+
+    for pokemon_type in pokemon_types:
+
+        if pokemon_type not in pokemon_types_in_db:
+
+            raise ValueError(
+                f"Error: {pokemon_type.capitalize()} is not in the database!")
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute(f"""SELECT pokemon_type AS type,
+    try:
+        cur.execute(f"""SELECT pokemon_type AS type,
                     COUNT(pokemon_type) AS count
                     FROM pokemon_types
-                    WHERE pokemon_type = %s
-                    GROUP BY type;""")
+                    WHERE pokemon_type IN (%s)
+                    GROUP BY type;""",
+                    [", ".join(pokemon_types)])
+
+    except (ConnectionError, ConnectionRefusedError) as conn_err:
+        conn_err("Error communicating with the database!")
 
     pokemon_data = cur.fetchall()
 
-    print(pd.DataFrame(pokemon_data))
+    return pd.DataFrame(pokemon_data)
 
 
 # TODO remove limit on SQL statement
@@ -139,11 +191,15 @@ if __name__ == "__main__":
     conn = get_db_connection(config)
 
     # An example section of code to see this works when run
-    get_all_pokemon(conn)
-    get_specific_pokemon(conn, "charmander")
-    get_pokemon_by_type(conn, "ground")
-    get_pokemon_moves(conn, "bulbasaur")
-    get_pokemon_all_types_count(conn)
-    get_pokemon_specific_types_count(conn, "rock")
+    # print(get_all_pokemon(conn))
+    # print(get_specific_pokemon(conn, "charmander"))
+    # print(get_pokemon_by_type(conn, "ground"))
+    # print(get_pokemon_moves(conn, "bulbasaur"))
+    # pokemon_types_counts_df = get_pokemon_all_types_count(conn)
+    # pokemon_types_in_db = set(pokemon_types_counts_df["type"].to_list())
+    # print(get_pokemon_specific_types_count(
+    #     conn, pokemon_types_in_db, ["rock", "fire"]))
+    # print(get_all_pokemon_all_move_names(conn))
+    print(get_all_pokemon_ability_count(conn))
 
     conn.close()
