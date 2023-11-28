@@ -74,16 +74,19 @@ def get_specified_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
     return pd.DataFrame(pokemon_data)
 
 
-# TODO merge SQL query to display move count, ability count & type count
-def get_all_pokemon_ability_count(conn: connection) -> DataFrame:
-    """Gets the ability count of all pokemon in the database"""
+def get_all_pokemon_counts(conn: connection) -> DataFrame:
+    """Gets the count of all pokemon moves, abilities & types in the database"""
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
     cur.execute("""SELECT p.pokemon_name AS name,
-                COUNT(pa.pokemon_ability_id) AS ability_count
+                COUNT(DISTINCT pa.pokemon_ability_id) AS ability_count,
+                COUNT(DISTINCT pt.pokemon_types_id) AS type_count,
+                COUNT(DISTINCT pm.pokemon_move_id) AS move_count 
                 FROM pokemon AS p
-                JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
+                INNER JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
+                INNER JOIN pokemon_types AS pt ON p.pokemon_id = pt.pokemon_id 
+                INNER JOIN pokemon_move AS pm ON p.pokemon_id = pm.pokemon_id
                 GROUP BY p.pokemon_name;""")
 
     pokemon_ability_count_data = cur.fetchall()
@@ -104,22 +107,6 @@ def get_all_pokemon_all_move_names(conn: connection) -> DataFrame:
                 ON pm.pokemon_id = p.pokemon_id
                 WHERE pokemon_name = 'Squirtle'
                 GROUP BY p.pokemon_name;""")
-
-    pokemon_data = cur.fetchall()
-
-    return pd.DataFrame(pokemon_data)
-
-
-def get_pokemon_all_types_count(conn: connection) -> DataFrame:
-    """Returns the count of types of pokemon in the database"""
-
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-
-    cur.execute(f"""SELECT pokemon_type AS type,
-                    COUNT(pokemon_type) AS count
-                    FROM pokemon_types
-                    GROUP BY type
-                    ORDER BY count;""")
 
     pokemon_data = cur.fetchall()
 
@@ -200,6 +187,7 @@ if __name__ == "__main__":
     # print(get_pokemon_specific_types_count(
     #     conn, pokemon_types_in_db, ["rock", "fire"]))
     # print(get_all_pokemon_all_move_names(conn))
-    print(get_all_pokemon_ability_count(conn))
+    print(get_all_pokemon_counts(conn))
+    print(get_pokemon_all_move_count(conn))
 
     conn.close()
