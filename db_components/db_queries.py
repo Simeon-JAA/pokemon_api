@@ -41,6 +41,22 @@ def get_all_pokemon_names(db_conn: connection) -> list[str]:
     return all_pokemon_names_df["name"].to_list()
 
 
+def get_all_pokemon_types(db_conn: connection) -> list[str]:
+    """Returns list of all pokemon types in the system"""
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT DISTINCT(pokemon_type) AS types
+                FROM pokemon_types;""")
+
+    all_pokemon_types = cur.fetchall()
+    all_pokemon_types_df = pd.DataFrame(all_pokemon_types)
+
+    cur.close()
+
+    return all_pokemon_types_df["types"].to_list()
+
+
 def get_all_pokemon(db_conn: connection) -> DataFrame:
     """Returns all pokemon from db"""
 
@@ -242,6 +258,8 @@ if __name__ == "__main__":
     all_pokemon_names = get_all_pokemon_names(conn)
     print(get_all_pokemon_count(conn))
     print(get_specific_pokemon_count(conn, 'bulbasaur'))
+    print(get_all_pokemon_types(conn))
+
     # print(get_pokemon_by_type(conn, "ground"))
     # print(get_pokemon_moves(conn, "bulbasaur"))
     # pokemon_types_counts_df = get_pokemon_all_types_count(conn)
