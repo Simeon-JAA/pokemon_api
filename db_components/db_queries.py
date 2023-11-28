@@ -23,6 +23,25 @@ def get_db_connection(config: dict) -> connection:
     return conn
 
 
+def get_all_pokemon_names(conn: connection) -> list[str]:
+    """Returns all pokemon_names from the db in a set"""
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    try:
+        cur.execute("""SELECT pokemon_name AS name
+                FROM pokemon;""")
+
+    except:
+        raise Exception("Error: Error with connection/database query!")
+
+    all_pokemon_names_df = pd.DataFrame(cur.fetchall())
+
+    cur.close()
+
+    return all_pokemon_names_df["name"].to_list()
+
+
 def get_all_pokemon(conn: connection) -> DataFrame:
     """Returns all pokemon from db"""
 
@@ -35,9 +54,14 @@ def get_all_pokemon(conn: connection) -> DataFrame:
     return pd.DataFrame(all_pokemon_data)
 
 
-def get_specific_pokemon(conn: connection, pokemon: str) -> DataFrame:
+def get_specific_pokemon(conn: connection, pokemon_name: str) -> DataFrame:
     """Returns specified pokemon from db and displays
     pokemon, stats and types"""
+
+    all_pokemon_names = get_all_pokemon_names(conn)
+
+    if pokemon_name.capitalize() not in all_pokemon_names:
+        raise ValueError("Error: Pokemon not in database!")
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -49,7 +73,7 @@ def get_specific_pokemon(conn: connection, pokemon: str) -> DataFrame:
                 JOIN pokemon_stats AS ps 
                 ON p.pokemon_id = ps.pokemon_id
                 WHERE pokemon_name = %s;""",
-                [pokemon.capitalize()])
+                [pokemon_name.capitalize()])
 
     specific_pokemon_data = cur.fetchall()
 
@@ -74,12 +98,43 @@ def get_specified_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
     return pd.DataFrame(pokemon_data)
 
 
-def get_all_pokemon_counts(conn: connection) -> DataFrame:
+# TODO FINISH FUNCTION
+def get_specific_pokemon_count(conn: connection, pokemon_name: str) -> DataFrame:
+    """Return DF of the specified pokemon count"""
+
+    return
+
+
+# TODO MOVE SPECIFIC INTO ABOVE FUNCTION
+def get_all_pokemon_counts(conn: connection, pokemon_names_in_db: set[str] = None, pokemon_name: str = None) -> DataFrame:
     """Gets the count of all pokemon moves, abilities & types in the database"""
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""SELECT p.pokemon_name AS name,
+    if pokemon_names_in_db and pokemon_name:
+
+        pokemon_names_in_db = list(
+            map(lambda p_name: p_name.lower(), pokemon_names_in_db))
+
+        if pokemon_name.lower() not in pokemon_names_in_db:
+            raise ValueError("Error: Pokemon name not detected in database!")
+
+        try:
+            cur.execute("""SELECT p.pokemon_name AS name,
+                COUNT(DISTINCT pa.pokemon_ability_id) AS ability_count,
+                COUNT(DISTINCT pt.pokemon_types_id) AS type_count,
+                COUNT(DISTINCT pm.pokemon_move_id) AS move_count 
+                FROM pokemon AS p
+                INNER JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
+                INNER JOIN pokemon_types AS pt ON p.pokemon_id = pt.pokemon_id 
+                INNER JOIN pokemon_move AS pm ON p.pokemon_id = pm.pokemon_id
+
+                GROUP BY p.pokemon_name;""")
+        except:
+            raise Exception("Error: Error with connection/database query!")
+    else:
+        try:
+            cur.execute("""SELECT p.pokemon_name AS name,
                 COUNT(DISTINCT pa.pokemon_ability_id) AS ability_count,
                 COUNT(DISTINCT pt.pokemon_types_id) AS type_count,
                 COUNT(DISTINCT pm.pokemon_move_id) AS move_count 
@@ -88,6 +143,9 @@ def get_all_pokemon_counts(conn: connection) -> DataFrame:
                 INNER JOIN pokemon_types AS pt ON p.pokemon_id = pt.pokemon_id 
                 INNER JOIN pokemon_move AS pm ON p.pokemon_id = pm.pokemon_id
                 GROUP BY p.pokemon_name;""")
+
+        except:
+            raise Exception("Error: Error with connection/database query!")
 
     pokemon_ability_count_data = cur.fetchall()
 
@@ -178,8 +236,8 @@ if __name__ == "__main__":
     conn = get_db_connection(config)
 
     # An example section of code to see this works when run
-    # print(get_all_pokemon(conn))
-    # print(get_specific_pokemon(conn, "charmander"))
+    all_pokemon_names = get_all_pokemon_names(conn)
+
     # print(get_pokemon_by_type(conn, "ground"))
     # print(get_pokemon_moves(conn, "bulbasaur"))
     # pokemon_types_counts_df = get_pokemon_all_types_count(conn)
@@ -187,7 +245,7 @@ if __name__ == "__main__":
     # print(get_pokemon_specific_types_count(
     #     conn, pokemon_types_in_db, ["rock", "fire"]))
     # print(get_all_pokemon_all_move_names(conn))
-    print(get_all_pokemon_counts(conn))
-    print(get_pokemon_all_move_count(conn))
+    # print(get_all_pokemon_counts(conn))
+    # print(get_pokemon_all_move_count(conn))
 
     conn.close()
