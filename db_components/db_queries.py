@@ -10,28 +10,27 @@ from psycopg2.extras import RealDictCursor
 from psycopg2.extensions import connection
 
 
-def get_db_connection(config: dict) -> connection:
+def get_db_connection(env_config: dict) -> connection:
     """Returns connection to the db"""
     try:
-        conn = connect(dbname=config["DBNAME"],
-                       host=config["HOST"],
-                       user=config["USER"])
+        db_conn = connect(dbname=env_config["DBNAME"],
+                          host=env_config["HOST"],
+                          user=env_config["USER"])
 
     except (ConnectionAbortedError, ConnectionError, ConnectionRefusedError) as con_err:
         con_err("Error: Unable to establish connection to the database!")
 
-    return conn
+    return db_conn
 
 
-def get_all_pokemon_names(conn: connection) -> list[str]:
+def get_all_pokemon_names(db_conn: connection) -> list[str]:
     """Returns all pokemon_names from the db in a set"""
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     try:
         cur.execute("""SELECT pokemon_name AS name
                 FROM pokemon;""")
-
     except:
         raise Exception("Error: Error with connection/database query!")
 
@@ -42,30 +41,30 @@ def get_all_pokemon_names(conn: connection) -> list[str]:
     return all_pokemon_names_df["name"].to_list()
 
 
-def get_all_pokemon(conn: connection) -> DataFrame:
+def get_all_pokemon(db_conn: connection) -> DataFrame:
     """Returns all pokemon from db"""
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute(f"""SELECT * FROM pokemon;""")
+    cur.execute("SELECT * FROM pokemon;")
 
     all_pokemon_data = cur.fetchall()
 
     return pd.DataFrame(all_pokemon_data)
 
 
-def get_specific_pokemon(conn: connection, pokemon_name: str) -> DataFrame:
+def get_specific_pokemon(db_conn: connection, pokemon_name: str) -> DataFrame:
     """Returns specified pokemon from db and displays
     pokemon, stats and types"""
 
-    all_pokemon_names = get_all_pokemon_names(conn)
+    all_pokemon_names = get_all_pokemon_names(db_conn)
 
     if pokemon_name.capitalize() not in all_pokemon_names:
         raise ValueError("Error: Pokemon not in database!")
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute(f"""SELECT p.pokemon_id, pokemon_name AS name, pokemon_type AS type,
+    cur.execute("""SELECT p.pokemon_id, pokemon_name AS name, pokemon_type AS type,
                 hp, attack, defense, speed, special_attack, special_defense, height, pokemon_weight AS weight 
                 FROM pokemon AS p 
                 JOIN pokemon_types AS pt
@@ -80,12 +79,12 @@ def get_specific_pokemon(conn: connection, pokemon_name: str) -> DataFrame:
     return pd.DataFrame(specific_pokemon_data)
 
 
-def get_specified_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
+def get_specified_pokemon_moves(db_conn: connection, pokemon: str) -> DataFrame:
     """Returns all moves of a specified pokemon"""
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute(f"""SELECT p.pokemon_id, pokemon_name AS name,
+    cur.execute("""SELECT p.pokemon_id, pokemon_name AS name,
                 pm.move_name, pm.accuracy, pm.power, pm.damage_class
                 FROM pokemon AS p
                 JOIN pokemon_move AS pm
@@ -98,54 +97,58 @@ def get_specified_pokemon_moves(conn: connection, pokemon: str) -> DataFrame:
     return pd.DataFrame(pokemon_data)
 
 
-# TODO FINISH FUNCTION
-def get_specific_pokemon_count(conn: connection, pokemon_name: str) -> DataFrame:
-    """Return DF of the specified pokemon count"""
+def get_specific_pokemon_count(db_conn: connection, pokemon_name: str) -> DataFrame:
+    """Return DF of the specified pokemon, including count of moves, abilities & types"""
 
-    return
+    all_pokemon_names = get_all_pokemon_names(db_conn)
+
+    all_pokemon_names = list(
+        map(lambda p_name: p_name.lower(), all_pokemon_names))
+
+    if pokemon_name.lower() not in all_pokemon_names:
+        raise ValueError("Error: Pokemon not in database!")
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    try:
+        cur.execute("""SELECT p.pokemon_name AS name,
+            COUNT(DISTINCT pa.pokemon_ability_id) AS ability_count,
+            COUNT(DISTINCT pt.pokemon_types_id) AS type_count,
+            COUNT(DISTINCT pm.pokemon_move_id) AS move_count 
+            FROM pokemon AS p
+            INNER JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
+            INNER JOIN pokemon_types AS pt ON p.pokemon_id = pt.pokemon_id 
+            INNER JOIN pokemon_move AS pm ON p.pokemon_id = pm.pokemon_id
+            WHERE p.pokemon_name = %s
+            GROUP BY p.pokemon_name;""",
+                    [pokemon_name.capitalize()])
+
+    except Exception as exc:
+        raise exc("Error: Error with connection/database query!")
+
+    pokemon_data = cur.fetchall()
+
+    return pd.DataFrame(pokemon_data)
 
 
-# TODO MOVE SPECIFIC INTO ABOVE FUNCTION
-def get_all_pokemon_counts(conn: connection, pokemon_names_in_db: set[str] = None, pokemon_name: str = None) -> DataFrame:
+def get_all_pokemon_count(db_conn: connection) -> DataFrame:
     """Gets the count of all pokemon moves, abilities & types in the database"""
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    if pokemon_names_in_db and pokemon_name:
+    try:
+        cur.execute("""SELECT p.pokemon_name AS name,
+            COUNT(DISTINCT pa.pokemon_ability_id) AS ability_count,
+            COUNT(DISTINCT pt.pokemon_types_id) AS type_count,
+            COUNT(DISTINCT pm.pokemon_move_id) AS move_count 
+            FROM pokemon AS p
+            INNER JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
+            INNER JOIN pokemon_types AS pt ON p.pokemon_id = pt.pokemon_id 
+            INNER JOIN pokemon_move AS pm ON p.pokemon_id = pm.pokemon_id
+            GROUP BY p.pokemon_name;""")
 
-        pokemon_names_in_db = list(
-            map(lambda p_name: p_name.lower(), pokemon_names_in_db))
-
-        if pokemon_name.lower() not in pokemon_names_in_db:
-            raise ValueError("Error: Pokemon name not detected in database!")
-
-        try:
-            cur.execute("""SELECT p.pokemon_name AS name,
-                COUNT(DISTINCT pa.pokemon_ability_id) AS ability_count,
-                COUNT(DISTINCT pt.pokemon_types_id) AS type_count,
-                COUNT(DISTINCT pm.pokemon_move_id) AS move_count 
-                FROM pokemon AS p
-                INNER JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
-                INNER JOIN pokemon_types AS pt ON p.pokemon_id = pt.pokemon_id 
-                INNER JOIN pokemon_move AS pm ON p.pokemon_id = pm.pokemon_id
-
-                GROUP BY p.pokemon_name;""")
-        except:
-            raise Exception("Error: Error with connection/database query!")
-    else:
-        try:
-            cur.execute("""SELECT p.pokemon_name AS name,
-                COUNT(DISTINCT pa.pokemon_ability_id) AS ability_count,
-                COUNT(DISTINCT pt.pokemon_types_id) AS type_count,
-                COUNT(DISTINCT pm.pokemon_move_id) AS move_count 
-                FROM pokemon AS p
-                INNER JOIN pokemon_ability AS pa ON p.pokemon_id = pa.pokemon_id
-                INNER JOIN pokemon_types AS pt ON p.pokemon_id = pt.pokemon_id 
-                INNER JOIN pokemon_move AS pm ON p.pokemon_id = pm.pokemon_id
-                GROUP BY p.pokemon_name;""")
-
-        except:
-            raise Exception("Error: Error with connection/database query!")
+    except:
+        raise Exception("Error: Error with connection/database query!")
 
     pokemon_ability_count_data = cur.fetchall()
 
@@ -153,12 +156,12 @@ def get_all_pokemon_counts(conn: connection, pokemon_names_in_db: set[str] = Non
 
 
 # TODO finish sql query
-def get_all_pokemon_all_move_names(conn: connection) -> DataFrame:
+def get_all_pokemon_all_move_names(db_conn: connection) -> DataFrame:
     """Returns list of all pokemon and all moves associated with that pokemon"""
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute(f"""SELECT p.pokemon_id AS id, p.pokemon_name AS name,
+    cur.execute("""SELECT p.pokemon_id AS id, p.pokemon_name AS name,
                 GROUP_CONCAT(pm.move_name SEPARATOR ',')
                 FROM pokemon AS p
                 JOIN pokemon_move AS pm
@@ -172,7 +175,9 @@ def get_all_pokemon_all_move_names(conn: connection) -> DataFrame:
 
 
 # TODO finish sql query
-def get_pokemon_specific_types_count(conn: connection, pokemon_types_in_db: set[str], pokemon_types: list[str]) -> DataFrame:
+def get_pokemon_specific_types_count(db_conn: connection,
+                                     pokemon_types_in_db: set[str],
+                                     pokemon_types: list[str]) -> DataFrame:
     """Returns the count of specified_types in the db"""
 
     pokemon_types = list(map(
@@ -185,10 +190,10 @@ def get_pokemon_specific_types_count(conn: connection, pokemon_types_in_db: set[
             raise ValueError(
                 f"Error: {pokemon_type.capitalize()} is not in the database!")
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     try:
-        cur.execute(f"""SELECT pokemon_type AS type,
+        cur.execute("""SELECT pokemon_type AS type,
                     COUNT(pokemon_type) AS count
                     FROM pokemon_types
                     WHERE pokemon_type IN (%s)
@@ -203,8 +208,7 @@ def get_pokemon_specific_types_count(conn: connection, pokemon_types_in_db: set[
     return pd.DataFrame(pokemon_data)
 
 
-# TODO remove limit on SQL statement
-def get_pokemon_by_type(conn: connection, pokemon_type: str) -> DataFrame:
+def get_pokemon_by_type(db_conn: connection, pokemon_type: str) -> DataFrame:
     """Returns all pokemon of a specified type"""
 
     allowed_types = {"grass", "ground"}
@@ -212,14 +216,13 @@ def get_pokemon_by_type(conn: connection, pokemon_type: str) -> DataFrame:
     if pokemon_type.lower() not in allowed_types:
         raise ValueError("Error: Pokemon type not recognised!")
 
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute(f"""SELECT p.pokemon_id, pokemon_name, pokemon_type
+    cur.execute("""SELECT p.pokemon_id, pokemon_name, pokemon_type
                 FROM pokemon AS p
                 JOIN pokemon_types AS pt
                 ON p.pokemon_id = pt.pokemon_id
-                WHERE pokemon_type = %s
-                LIMIT 10;""",
+                WHERE pokemon_type = %s;""",
                 [pokemon_type.capitalize()])
 
     pokemon_data = cur.fetchall()
@@ -237,7 +240,8 @@ if __name__ == "__main__":
 
     # An example section of code to see this works when run
     all_pokemon_names = get_all_pokemon_names(conn)
-
+    print(get_all_pokemon_count(conn))
+    print(get_specific_pokemon_count(conn, 'bulbasaur'))
     # print(get_pokemon_by_type(conn, "ground"))
     # print(get_pokemon_moves(conn, "bulbasaur"))
     # pokemon_types_counts_df = get_pokemon_all_types_count(conn)
