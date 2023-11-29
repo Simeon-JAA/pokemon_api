@@ -10,10 +10,10 @@ def api_request_data(url: str) -> dict:
         r = requests.get(url)
 
         if r.status_code >= 400:
-            raise ValueError("Error: Page does not exist!")
+            raise ValueError(f"Error: Problem with provided URL ({url})!")
 
-    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as Err:
-        Err("Error: Connection to API was unsuccessful!")
+    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
+        conn_err("Error: Connection to API was unsuccessful!")
 
     data = r.json()
 
