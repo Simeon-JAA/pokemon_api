@@ -17,7 +17,7 @@ def mock_config_environment() -> dict:
 
 
 @pytest.fixture
-def mock_all_pokemon_nanmes() -> list[str]:
+def mock_all_pokemon_names() -> list[str]:
     """Returns mock of mocked pokemon names"""
 
     return ["mock_pokemon_name_1",
