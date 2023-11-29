@@ -5,6 +5,7 @@ import pytest
 from unittest.mock import patch
 
 from db_queries import get_db_connection, get_specific_pokemon
+from db_queries import get_specific_pokemon_type
 
 
 @patch("db_queries.connect")
@@ -50,3 +51,15 @@ def test_exception_raised_with_pokemon_name_used_not_in_db(mock_connect, mock_ge
 
     with pytest.raises(ValueError):
         get_specific_pokemon(mock_connect, "not a pokemon name")
+
+
+@patch("db_queries.connect")
+@patch("db_queries.get_all_pokemon_types")
+def test_exception_raised_with_pokemon_type_used_not_in_db(mock_connect, mock_get_all_pokemon_types, mock_all_pokemon_types):
+    """Tests exeption raised (Value error) when type is used in argument that does not exist in the system"""
+
+    mock_connect.rerturn_value = "mock_conneciton"
+    mock_get_all_pokemon_types.return_value = mock_all_pokemon_types
+
+    with pytest.raises(ValueError):
+        get_specific_pokemon_type(mock_connect, "not a pokemon type")

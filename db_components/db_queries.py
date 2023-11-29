@@ -191,20 +191,19 @@ def get_all_pokemon_all_move_names(db_conn: connection) -> DataFrame:
 
 
 # TODO finish sql query
-def get_pokemon_specific_types_count(db_conn: connection,
-                                     pokemon_types_in_db: set[str],
-                                     pokemon_types: list[str]) -> DataFrame:
+def get_pokemon_specific_types_count(db_conn: connection, pokemon_types_input: list[str]) -> DataFrame:
     """Returns the count of specified_types in the db"""
 
-    pokemon_types = list(map(
-        lambda pokemon_type: pokemon_type.capitalize(), pokemon_types))
+    all_pokemon_types = get_all_pokemon_types(db_conn)
+    all_pokemon_types = list(map(lambda p_type:
+                                 p_type.lower(), all_pokemon_types))
 
-    for pokemon_type in pokemon_types:
+    for p_type in pokemon_types_input:
 
-        if pokemon_type not in pokemon_types_in_db:
+        if p_type.lower() not in all_pokemon_types:
 
             raise ValueError(
-                f"Error: {pokemon_type.capitalize()} is not in the database!")
+                f"Error: {p_type.capitalize()} is not in the database!")
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
@@ -214,7 +213,7 @@ def get_pokemon_specific_types_count(db_conn: connection,
                     FROM pokemon_types
                     WHERE pokemon_type IN (%s)
                     GROUP BY type;""",
-                    [", ".join(pokemon_types)])
+                    [", ".join(pokemon_types_input)])
 
     except (ConnectionError, ConnectionRefusedError) as conn_err:
         conn_err("Error communicating with the database!")
@@ -224,7 +223,7 @@ def get_pokemon_specific_types_count(db_conn: connection,
     return pd.DataFrame(pokemon_data)
 
 
-def get_pokemon_by_type(db_conn: connection, pokemon_type: str) -> DataFrame:
+def get_specific_pokemon_type(db_conn: connection, pokemon_type: str) -> DataFrame:
     """Returns all pokemon of a specified type"""
 
     allowed_types = {"grass", "ground"}
