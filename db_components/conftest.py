@@ -43,3 +43,14 @@ def mock_all_pokemon_types() -> list[str]:
         "mock_type_6",
         "mock_type_n",
     ]
+
+@pytest.fixture
+def mock_all_pokemon_moves() -> list[str]:
+   """Mocks and returns all moves"""
+
+   return [
+      "mock_move_1",
+      "mock_move_2",
+      "mock_move_3",
+      "mock_move_n"
+    ]
