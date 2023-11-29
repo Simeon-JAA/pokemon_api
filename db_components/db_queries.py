@@ -46,8 +46,12 @@ def get_all_pokemon_types(db_conn: connection) -> list[str]:
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""SELECT DISTINCT(pokemon_type) AS types
+    try:
+        cur.execute("""SELECT DISTINCT(pokemon_type) AS types
                 FROM pokemon_types;""")
+
+    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
+        raise conn_err("Error: Error with db connection!")
 
     all_pokemon_types = cur.fetchall()
     all_pokemon_types_df = pd.DataFrame(all_pokemon_types)
@@ -55,6 +59,26 @@ def get_all_pokemon_types(db_conn: connection) -> list[str]:
     cur.close()
 
     return all_pokemon_types_df["types"].to_list()
+
+
+def get_all_pokemon_moves(db_conn: connection) -> list[str]:
+    """Returns list of all pokemon moves in the system"""
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    try:
+        cur.execute("""SELECT DISTINCT(move_name) AS name
+                FROM pokemon_move;""")
+
+    except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
+        raise conn_err("Error: Error with db connection!")
+
+    all_pokemon_moves = cur.fetchall()
+    all_pokemon_moves_df = pd.DataFrame(all_pokemon_moves)
+
+    cur.close()
+
+    return all_pokemon_moves_df["name"].to_list()
 
 
 def get_all_pokemon(db_conn: connection) -> DataFrame:
@@ -245,6 +269,34 @@ def get_specific_pokemon_type(db_conn: connection, pokemon_type: str) -> DataFra
     return pd.DataFrame(pokemon_data)
 
 
+# TODO version_group_control count
+def specific_version_control_count(db_conn: connection, move_name: str) -> DataFrame:
+    """Return version control for move specified"""
+
+    all_move_names = get_all_pokemon_moves(conn)
+    all_move_names = list(
+        map(lambda p_move_name: p_move_name.lower(),
+            all_move_names))
+
+    if move_name.lower() not in all_move_names:
+        raise (ValueError("Error: Not found in db!"))
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT COUNT(*) 
+                FROM pokemon_move AS pm
+                LEFT JOIN pokemon_move_flavor_text AS pmft
+                ON pm.pokemon_move_id = pmft.pokemon_move_id;""")
+
+    data = cur.fetchall()
+
+    cur.close()
+
+    data_df = pd.DataFrame(data)
+    # print(data["version_group"])
+    return data_df
+
+
 if __name__ == "__main__":
 
     load_dotenv()
@@ -253,11 +305,18 @@ if __name__ == "__main__":
 
     conn = get_db_connection(config)
 
-    # An example section of code to see this works when run
-    all_pokemon_names = get_all_pokemon_names(conn)
-    print(get_all_pokemon_count(conn))
-    print(get_specific_pokemon_count(conn, 'bulbasaur'))
-    print(get_all_pokemon_types(conn))
+    # An example section of code to see this worksp when run
+
+    # -- This code works
+    # all_pokemon_names = get_all_pokemon_names(conn)
+    # print(get_all_pokemon_count(conn))
+    # print(get_specific_pokemon_count(conn, 'bulbasaur'))
+    # print(get_all_pokemon_types(conn))
+
+    # -- This code is testing
+    print(get_all_pokemon_moves(conn))
+    # print(version_control_count(conn))
+    # -- This code doesn't work
 
     # print(get_pokemon_by_type(conn, "ground"))
     # print(get_pokemon_moves(conn, "bulbasaur"))
