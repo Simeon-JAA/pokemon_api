@@ -34,9 +34,9 @@ def get_all_pokemon_names(db_conn: connection) -> list[str]:
     except:
         raise Exception("Error: Error with connection/database query!")
 
-    all_pokemon_names_df = pd.DataFrame(cur.fetchall())
-
+    all_pokemon_names = cur.fetchall()
     cur.close()
+    all_pokemon_names_df = pd.DataFrame(all_pokemon_names)
 
     return all_pokemon_names_df["name"].to_list()
 
@@ -54,9 +54,8 @@ def get_all_pokemon_types(db_conn: connection) -> list[str]:
         raise conn_err("Error: Error with db connection!")
 
     all_pokemon_types = cur.fetchall()
-    all_pokemon_types_df = pd.DataFrame(all_pokemon_types)
-
     cur.close()
+    all_pokemon_types_df = pd.DataFrame(all_pokemon_types)
 
     return all_pokemon_types_df["types"].to_list()
 
@@ -74,9 +73,8 @@ def get_all_pokemon_moves(db_conn: connection) -> list[str]:
         raise conn_err("Error: Error with db connection!")
 
     all_pokemon_moves = cur.fetchall()
-    all_pokemon_moves_df = pd.DataFrame(all_pokemon_moves)
-
     cur.close()
+    all_pokemon_moves_df = pd.DataFrame(all_pokemon_moves)
 
     return all_pokemon_moves_df["name"].to_list()
 
@@ -100,6 +98,7 @@ def get_all_pokemon(db_conn: connection) -> DataFrame:
                 ORDER BY p.pokemon_name;""")
 
     all_pokemon_data = cur.fetchall()
+    cur.close()
     all_pokemon_data_df = pd.DataFrame(all_pokemon_data)
 
     return pd.DataFrame(all_pokemon_data_df)
@@ -131,8 +130,10 @@ def get_specific_pokemon(db_conn: connection, pokemon_name: str) -> DataFrame:
                 [pokemon_name.capitalize()])
 
     specific_pokemon_data = cur.fetchall()
+    cur.close()
+    specific_pokemon_data_df = pd.DataFrame(specific_pokemon_data)
 
-    return pd.DataFrame(specific_pokemon_data)
+    return pd.DataFrame(specific_pokemon_data_df)
 
 
 def get_specific_pokemon_moves(db_conn: connection, pokemon_name: str) -> DataFrame:
@@ -209,8 +210,10 @@ def get_all_pokemon_count(db_conn: connection) -> DataFrame:
         raise Exception("Error: Error with connection/database query!")
 
     pokemon_ability_count_data = cur.fetchall()
+    cur.close()
+    pokemon_ability_count_data_df = pd.DataFrame(pokemon_ability_count_data)
 
-    return pd.DataFrame(pokemon_ability_count_data)
+    return pokemon_ability_count_data_df
 
 
 def get_all_pokemon_move_names(db_conn: connection) -> DataFrame:
@@ -227,9 +230,37 @@ def get_all_pokemon_move_names(db_conn: connection) -> DataFrame:
                 ORDER BY p.pokemon_id;""")
 
     pokemon_data = cur.fetchall()
+    cur.close()
     pokemon_data_df = pd.DataFrame(pokemon_data)
 
     return pokemon_data_df
+
+
+def get_pokemon_by_move_name(db_conn: connection, pokemon_move: str) -> DataFrame:
+    """Return data frame of pokemon that are associated with the move"""
+
+    all_pokemon_moves = get_all_pokemon_moves(db_conn)
+
+    if pokemon_move.lower() not in all_pokemon_moves:
+        raise ValueError("Error: Pokemon move is not in the database!")
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT p.pokemon_id, pokemon_name,
+                STRING_AGG (move_name, ', ') AS move_list
+                FROM pokemon AS p
+                JOIN pokemon_move AS pm
+                ON p.pokemon_id = pm.pokemon_id
+                GROUP BY p.pokemon_id
+                HAVING STRING_AGG (move_name, ', ') ILIKE %s
+                ORDER BY p.pokemon_id;""",
+                [f"%{pokemon_move.lower()}%"])
+
+    pokemon_by_move = cur.fetchall()
+    cur.close()
+    pokemon_by_move_df = pd.DataFrame(pokemon_by_move)
+
+    return pokemon_by_move_df
 
 
 # TODO finish sql query
@@ -329,9 +360,10 @@ if __name__ == "__main__":
     # print(get_specific_pokemon(conn, 'Bulbasaur'))
     # print(get_specific_pokemon_count(conn, 'bulbasaur'))
     # print(get_all_pokemon_count(conn))
+    # print(get_all_pokemon_move_names(conn))
 
     # -- This code is testing
-    print(get_all_pokemon_move_names(conn))
+    print(get_pokemon_by_move_name(conn, "razor wind"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
 
