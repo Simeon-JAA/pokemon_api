@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch
 
 from db_queries import get_db_connection, get_specific_pokemon
-from db_queries import get_specific_pokemon_type, specific_version_control_count
+from db_queries import get_pokemon_by_type, specific_version_control_count
 
 
 @patch("db_queries.connect")
@@ -62,7 +62,7 @@ def test_exception_raised_with_pokemon_type_used_not_in_db(mock_connect, mock_ge
     mock_get_all_pokemon_types.return_value = mock_all_pokemon_types
 
     with pytest.raises(ValueError):
-        get_specific_pokemon_type(mock_connect, "not a pokemon type")
+        get_pokemon_by_type(mock_connect, "not a pokemon type")
 
 
 # TODO fix test

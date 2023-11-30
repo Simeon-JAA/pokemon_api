@@ -294,26 +294,29 @@ def get_pokemon_specific_types_count(db_conn: connection, pokemon_types_input: l
     return pd.DataFrame(pokemon_data)
 
 
-def get_specific_pokemon_type(db_conn: connection, pokemon_type: str) -> DataFrame:
-    """Returns all pokemon of a specified type"""
+def get_pokemon_by_type(db_conn: connection, pokemon_type: str) -> DataFrame:
+    """Returns all pokemon of a specific type"""
 
-    allowed_types = {"grass", "ground"}
+    all_pokemon_types = get_all_pokemon_types(db_conn)
 
-    if pokemon_type.lower() not in allowed_types:
-        raise ValueError("Error: Pokemon type not recognised!")
+    if pokemon_type.lower() not in all_pokemon_types:
+        raise ValueError("Error: Pokemon type not in database!!")
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""SELECT p.pokemon_id, pokemon_name, pokemon_type
+    cur.execute("""SELECT p.pokemon_id, pokemon_name,
+                STRING_AGG (pokemon_type, ', ') AS pokemon_types
                 FROM pokemon AS p
                 JOIN pokemon_types AS pt
                 ON p.pokemon_id = pt.pokemon_id
-                WHERE pokemon_type = %s;""",
-                [pokemon_type.capitalize()])
+                GROUP BY p.pokemon_id
+                HAVING STRING_AGG (pokemon_type, ', ') ILIKE %s;""",
+                [f"%{pokemon_type.capitalize()}%"])
 
-    pokemon_data = cur.fetchall()
+    pokemon_by_type = cur.fetchall()
+    pokemon_by_type_df = pd.DataFrame(pokemon_by_type)
 
-    return pd.DataFrame(pokemon_data)
+    return pokemon_by_type_df
 
 
 # TODO version_group_control count
@@ -361,9 +364,10 @@ if __name__ == "__main__":
     # print(get_specific_pokemon_count(conn, 'bulbasaur'))
     # print(get_all_pokemon_count(conn))
     # print(get_all_pokemon_move_names(conn))
+    # print(get_pokemon_by_move_name(conn, "Double Slap"))
 
     # -- This code is testing
-    print(get_pokemon_by_move_name(conn, "razor wind"))
+    print(get_pokemon_by_type(conn, "ghost"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
 
