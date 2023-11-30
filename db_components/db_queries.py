@@ -294,24 +294,38 @@ def get_pokemon_specific_types_count(db_conn: connection, pokemon_types_input: l
     return pd.DataFrame(pokemon_data)
 
 
-def get_pokemon_by_type(db_conn: connection, pokemon_type: str) -> DataFrame:
+def get_pokemon_by_type(db_conn: connection, pokemon_type: str | list[str]) -> DataFrame:
     """Returns all pokemon of a specific type"""
 
     all_pokemon_types = get_all_pokemon_types(db_conn)
 
-    if pokemon_type.lower() not in all_pokemon_types:
-        raise ValueError("Error: Pokemon type not in database!!")
+    if isinstance(pokemon_type, str):
+        if pokemon_type.lower() not in all_pokemon_types:
+            raise ValueError("Error: Pokemon type not in database!")
+
+    elif isinstance(pokemon_type, list):
+        for p_type in pokemon_type:
+
+            if not isinstance(p_type, str):
+                raise TypeError(f"Error: {p_type} should be of a string type!")
+
+            if p_type.lower() not in all_pokemon_types:
+                raise ValueError(
+                    f"Error: Pokemon type {p_type} not in database!")
+
+        pokemon_type.sort()
+        pokemon_type = ", ".join(pokemon_type)
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     cur.execute("""SELECT p.pokemon_id, pokemon_name,
-                STRING_AGG (pokemon_type, ', ') AS pokemon_types
+                STRING_AGG (pokemon_type, ', ' ORDER BY pokemon_type) AS pokemon_types
                 FROM pokemon AS p
                 JOIN pokemon_types AS pt
                 ON p.pokemon_id = pt.pokemon_id
                 GROUP BY p.pokemon_id
-                HAVING STRING_AGG (pokemon_type, ', ') ILIKE %s;""",
-                [f"%{pokemon_type.capitalize()}%"])
+                HAVING STRING_AGG (pokemon_type, ', ' ORDER BY pokemon_type) ILIKE %s;""",
+                [f"%{pokemon_type.title()}%"])
 
     pokemon_by_type = cur.fetchall()
     pokemon_by_type_df = pd.DataFrame(pokemon_by_type)
@@ -365,9 +379,9 @@ if __name__ == "__main__":
     # print(get_all_pokemon_count(conn))
     # print(get_all_pokemon_move_names(conn))
     # print(get_pokemon_by_move_name(conn, "Double Slap"))
+    # print(get_pokemon_by_type(conn, ["rock", "fire"]))
 
     # -- This code is testing
-    print(get_pokemon_by_type(conn, "ghost"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
 
