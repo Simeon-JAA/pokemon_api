@@ -29,7 +29,7 @@ def get_all_pokemon_names(db_conn: connection) -> list[str]:
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     try:
-        cur.execute("""SELECT pokemon_name AS name
+        cur.execute("""SELECT LOWER(pokemon_name) AS name
                 FROM pokemon;""")
     except:
         raise Exception("Error: Error with connection/database query!")
@@ -47,7 +47,7 @@ def get_all_pokemon_types(db_conn: connection) -> list[str]:
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     try:
-        cur.execute("""SELECT DISTINCT(pokemon_type) AS types
+        cur.execute("""SELECT DISTINCT(LOWER(pokemon_type)) AS types
                 FROM pokemon_types;""")
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
@@ -67,7 +67,7 @@ def get_all_pokemon_moves(db_conn: connection) -> list[str]:
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     try:
-        cur.execute("""SELECT DISTINCT(move_name) AS name
+        cur.execute("""SELECT DISTINCT(LOWER(move_name)) AS name
                 FROM pokemon_move;""")
 
     except (ConnectionError, ConnectionAbortedError, ConnectionRefusedError) as conn_err:
@@ -135,8 +135,10 @@ def get_specific_pokemon(db_conn: connection, pokemon_name: str) -> DataFrame:
     return pd.DataFrame(specific_pokemon_data)
 
 
-def get_specified_pokemon_moves(db_conn: connection, pokemon: str) -> DataFrame:
-    """Returns all moves of a specified pokemon"""
+def get_specific_pokemon_moves(db_conn: connection, pokemon: str) -> DataFrame:
+    """Returns all moves of a specific pokemon"""
+
+    all_pokemon_names = get_all_pokemon_names(db_conn)
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
@@ -157,9 +159,6 @@ def get_specific_pokemon_count(db_conn: connection, pokemon_name: str) -> DataFr
     """Return DF of the specified pokemon, including count of moves, abilities & types"""
 
     all_pokemon_names = get_all_pokemon_names(db_conn)
-
-    all_pokemon_names = list(
-        map(lambda p_name: p_name.lower(), all_pokemon_names))
 
     if pokemon_name.lower() not in all_pokemon_names:
         raise ValueError("Error: Pokemon not in database!")
@@ -235,8 +234,6 @@ def get_pokemon_specific_types_count(db_conn: connection, pokemon_types_input: l
     """Returns the count of specified_types in the db"""
 
     all_pokemon_types = get_all_pokemon_types(db_conn)
-    all_pokemon_types = list(map(lambda p_type:
-                                 p_type.lower(), all_pokemon_types))
 
     for p_type in pokemon_types_input:
 
@@ -290,9 +287,6 @@ def specific_version_control_count(db_conn: connection, move_name: str) -> DataF
     """Return version control for move specified"""
 
     all_move_names = get_all_pokemon_moves(conn)
-    all_move_names = list(
-        map(lambda p_move_name: p_move_name.lower(),
-            all_move_names))
 
     if move_name.lower() not in all_move_names:
         raise (ValueError("Error: Not found in db!"))
@@ -325,17 +319,19 @@ if __name__ == "__main__":
 
     # -- This code works
     # all_pokemon_names = get_all_pokemon_names(conn)
-    print(get_all_pokemon(conn))
+    # all_pokemon_types = get_all_pokemon_types(conn)
+    # all_pokemon_moves = get_all_pokemon_moves(conn)
+
+    # print(get_all_pokemon(conn))
     # print(get_specific_pokemon(conn, 'Bulbasaur'))
     # print(get_specific_pokemon_count(conn, 'bulbasaur'))
     # print(get_all_pokemon_count(conn))
-    # print(get_all_pokemon_types(conn))
 
     # -- This code is testing
-    # print(get_all_pokemon_moves(conn))
+    # print(get_specific_pokemon_moves(conn, "bulbasuar"))
     # print(version_control_count(conn))
-    # -- This code doesn't work
 
+    # -- This code doesn't work
     # print(get_pokemon_by_type(conn, "ground"))
     # print(get_pokemon_moves(conn, "bulbasaur"))
     # pokemon_types_counts_df = get_pokemon_all_types_count(conn)
