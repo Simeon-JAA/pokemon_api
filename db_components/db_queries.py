@@ -87,11 +87,16 @@ def get_all_pokemon(db_conn: connection) -> DataFrame:
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     cur.execute("""SELECT p.pokemon_id, p.pokemon_name,
-                STRING_AGG (ps.pokemon_type, ', ') AS types
+                STRING_AGG (pt.pokemon_type, ', ') AS types,
+                hp, attack, defense, speed, special_attack, special_defense, height, pokemon_weight AS weight
                 FROM pokemon AS p
-                JOIN pokemon_types AS ps
+                JOIN pokemon_types AS pt 
+                ON p.pokemon_id = pt.pokemon_id
+                JOIN pokemon_stats AS ps
                 ON p.pokemon_id = ps.pokemon_id
-                GROUP BY p.pokemon_id
+                GROUP BY p.pokemon_id,
+                ps.hp, ps.attack, ps.defense, ps.speed, ps.special_attack, 
+                ps.special_defense, ps.height, ps.pokemon_weight
                 ORDER BY p.pokemon_name;""")
 
     all_pokemon_data = cur.fetchall()
