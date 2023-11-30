@@ -135,10 +135,13 @@ def get_specific_pokemon(db_conn: connection, pokemon_name: str) -> DataFrame:
     return pd.DataFrame(specific_pokemon_data)
 
 
-def get_specific_pokemon_moves(db_conn: connection, pokemon: str) -> DataFrame:
+def get_specific_pokemon_moves(db_conn: connection, pokemon_name: str) -> DataFrame:
     """Returns all moves of a specific pokemon"""
 
     all_pokemon_names = get_all_pokemon_names(db_conn)
+
+    if pokemon_name.lower() not in all_pokemon_names:
+        raise ValueError("Error: Pokemon not in database!")
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
@@ -148,7 +151,7 @@ def get_specific_pokemon_moves(db_conn: connection, pokemon: str) -> DataFrame:
                 JOIN pokemon_move AS pm
                 ON p.pokemon_id = pm.pokemon_id
                 WHERE pokemon_name = %s;""",
-                [pokemon.capitalize()])
+                [pokemon_name.capitalize()])
 
     pokemon_data = cur.fetchall()
 
@@ -210,23 +213,23 @@ def get_all_pokemon_count(db_conn: connection) -> DataFrame:
     return pd.DataFrame(pokemon_ability_count_data)
 
 
-# TODO finish sql query
-def get_all_pokemon_all_move_names(db_conn: connection) -> DataFrame:
-    """Returns list of all pokemon and all moves associated with that pokemon"""
+def get_all_pokemon_move_names(db_conn: connection) -> DataFrame:
+    """Returns list of all pokemon and name of all moves the pokemon has"""
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""SELECT p.pokemon_id AS id, p.pokemon_name AS name,
-                GROUP_CONCAT(pm.move_name SEPARATOR ',')
+    cur.execute("""SELECT p.pokemon_id, pokemon_name AS name, 
+                STRING_AGG (move_name, ',') AS all_move_names
                 FROM pokemon AS p
                 JOIN pokemon_move AS pm
                 ON pm.pokemon_id = p.pokemon_id
-                WHERE pokemon_name = 'Squirtle'
-                GROUP BY p.pokemon_name;""")
+                GROUP BY p.pokemon_id
+                ORDER BY p.pokemon_id;""")
 
     pokemon_data = cur.fetchall()
+    pokemon_data_df = pd.DataFrame(pokemon_data)
 
-    return pd.DataFrame(pokemon_data)
+    return pokemon_data_df
 
 
 # TODO finish sql query
@@ -328,7 +331,8 @@ if __name__ == "__main__":
     # print(get_all_pokemon_count(conn))
 
     # -- This code is testing
-    # print(get_specific_pokemon_moves(conn, "bulbasuar"))
+    print(get_all_pokemon_move_names(conn))
+    # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
 
     # -- This code doesn't work
