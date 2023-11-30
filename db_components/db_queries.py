@@ -42,7 +42,7 @@ def get_all_pokemon_names(db_conn: connection) -> list[str]:
 
 
 def get_all_pokemon_types(db_conn: connection) -> list[str]:
-    """Returns list of all pokemon types in the system"""
+    """Returns list of all pokemon types in the database"""
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
@@ -62,7 +62,7 @@ def get_all_pokemon_types(db_conn: connection) -> list[str]:
 
 
 def get_all_pokemon_moves(db_conn: connection) -> list[str]:
-    """Returns list of all pokemon moves in the system"""
+    """Returns list of all pokemon moves in the database"""
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
@@ -86,11 +86,18 @@ def get_all_pokemon(db_conn: connection) -> DataFrame:
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("SELECT * FROM pokemon;")
+    cur.execute("""SELECT p.pokemon_id, p.pokemon_name,
+                STRING_AGG (ps.pokemon_type, ', ') AS types
+                FROM pokemon AS p
+                JOIN pokemon_types AS ps
+                ON p.pokemon_id = ps.pokemon_id
+                GROUP BY p.pokemon_id
+                ORDER BY p.pokemon_name;""")
 
     all_pokemon_data = cur.fetchall()
+    all_pokemon_data_df = pd.DataFrame(all_pokemon_data)
 
-    return pd.DataFrame(all_pokemon_data)
+    return pd.DataFrame(all_pokemon_data_df)
 
 
 def get_specific_pokemon(db_conn: connection, pokemon_name: str) -> DataFrame:
@@ -104,14 +111,18 @@ def get_specific_pokemon(db_conn: connection, pokemon_name: str) -> DataFrame:
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""SELECT p.pokemon_id, pokemon_name AS name, pokemon_type AS type,
-                hp, attack, defense, speed, special_attack, special_defense, height, pokemon_weight AS weight 
-                FROM pokemon AS p 
+    cur.execute("""SELECT p.pokemon_id, pokemon_name AS name, 
+                STRING_AGG(pokemon_type,  ', ') AS types,
+                hp, attack, defense, speed, special_attack, special_defense, height, pokemon_weight AS weight
+                FROM pokemon AS p
                 JOIN pokemon_types AS pt
                 ON p.pokemon_id = pt.pokemon_id
-                JOIN pokemon_stats AS ps 
+                JOIN pokemon_stats AS ps
                 ON p.pokemon_id = ps.pokemon_id
-                WHERE pokemon_name = %s;""",
+                WHERE pokemon_name = %s
+                GROUP BY p.pokemon_id,
+                ps.hp, ps.attack, ps.defense, ps.speed, ps.special_attack, 
+                ps.special_defense, ps.height, ps.pokemon_weight;""",
                 [pokemon_name.capitalize()])
 
     specific_pokemon_data = cur.fetchall()
@@ -309,12 +320,14 @@ if __name__ == "__main__":
 
     # -- This code works
     # all_pokemon_names = get_all_pokemon_names(conn)
-    # print(get_all_pokemon_count(conn))
+    print(get_all_pokemon(conn))
+    # print(get_specific_pokemon(conn, 'Bulbasaur'))
     # print(get_specific_pokemon_count(conn, 'bulbasaur'))
+    # print(get_all_pokemon_count(conn))
     # print(get_all_pokemon_types(conn))
 
     # -- This code is testing
-    print(get_all_pokemon_moves(conn))
+    # print(get_all_pokemon_moves(conn))
     # print(version_control_count(conn))
     # -- This code doesn't work
 
