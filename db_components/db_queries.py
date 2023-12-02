@@ -459,24 +459,17 @@ if __name__ == "__main__":
     # print(get_specific_pokemon(conn, 'Bulbasaur'))
     # print(get_specific_pokemon_count(conn, 'bulbasaur'))
     # print(get_all_pokemon_count(conn))
-    # print(get_all_pokemon_move_names(conn))
-    # print(get_pokemon_by_type(conn, ["rock", "fire"]))
 
     # -- This code is testing
+    # print(get_pokemon_by_type(conn, ["rock", "fire"]))
+    # print(get_all_pokemon_move_names(conn))
     # print(get_pokemon_by_move_name(conn, ["Aerial Ace", "Agility"]))
-    print(get_pokemon_by_ability(conn, "Overgrow"))
+    # print(get_pokemon_by_ability(conn, "Overgrow"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
 
     # -- This code doesn't work
-    # print(get_pokemon_by_type(conn, "ground"))
     # print(get_pokemon_moves(conn, "bulbasaur"))
     # pokemon_types_counts_df = get_pokemon_all_types_count(conn)
-    # pokemon_types_in_db = set(pokemon_types_counts_df["type"].to_list())
-    # print(get_pokemon_specific_types_count(
-    #     conn, pokemon_types_in_db, ["rock", "fire"]))
-    # print(get_all_pokemon_all_move_names(conn))
-    # print(get_all_pokemon_counts(conn))
-    # print(get_pokemon_all_move_count(conn))
 
     conn.close()
