@@ -374,42 +374,44 @@ def get_pokemon_by_type(db_conn: connection, pokemon_type: str | list[str]) -> D
 # If (ability_1, ability_2, ability_3) and input is (ability_1, ability_3) pokemon will not show up
 # TODO fix this
 def get_pokemon_by_ability(db_conn: connection, pokemon_ability: str | list[str]) -> DataFrame:
-    """Returns all pokemon of a specific type"""
+    """Returns all pokemon with relation to listed abilities (or ability)"""
 
-    all_pokemon_abilities = ge(db_conn)
+    all_pokemon_abilities = get_all_pokemon_abilities(db_conn)
 
     if isinstance(pokemon_ability, str):
-        if pokemon_ability.lower() not in all_pokemon_types:
-            raise ValueError("Error: Pokemon type not in database!")
+        if pokemon_ability.lower() not in all_pokemon_abilities:
+            raise ValueError(
+                f"Error: Pokemon ability ({pokemon_ability.title()}) not in database!")
 
     elif isinstance(pokemon_ability, list):
-        for p_type in pokemon_ability:
+        for p_ability in pokemon_ability:
 
-            if not isinstance(p_type, str):
-                raise TypeError(f"Error: {p_type} should be of a string type!")
+            if not isinstance(p_ability, str):
+                raise TypeError(
+                    f"Error: {p_ability} should be of a string type!")
 
-            if p_type.lower() not in all_pokemon_types:
+            if p_ability.lower() not in all_pokemon_abilities:
                 raise ValueError(
-                    f"Error: Pokemon type {p_type} not in database!")
+                    f"Error: Pokemon type {p_ability.title()} not in database!")
 
         pokemon_ability.sort()
         pokemon_ability = ", ".join(pokemon_ability)
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""SELECT p.pokemon_id, pokemon_name,
-                STRING_AGG (pokemon_type, ', ' ORDER BY pokemon_type) AS pokemon_types
+    cur.execute("""SELECT p.pokemon_id, pokemon_name, 
+                STRING_AGG(pa.ability_name, ', ' ORDER BY ability_name) AS all_ability_names
                 FROM pokemon AS p
-                JOIN pokemon_types AS pt
-                ON p.pokemon_id = pt.pokemon_id
+                JOIN pokemon_ability AS pa
+                ON p.pokemon_id = pa.pokemon_id
                 GROUP BY p.pokemon_id
-                HAVING STRING_AGG (pokemon_type, ', ' ORDER BY pokemon_type) ILIKE %s;""",
+                HAVING STRING_AGG(LOWER(pa.ability_name), ', ' ORDER BY ability_name) ILIKE %s;""",
                 [f"%{pokemon_ability.title()}%"])
 
-    pokemon_by_type = cur.fetchall()
-    pokemon_by_type_df = pd.DataFrame(pokemon_by_type)
+    pokemon_by_ability = cur.fetchall()
+    pokemon_by_ability_df = pd.DataFrame(pokemon_by_ability)
 
-    return pokemon_by_type_df
+    return pokemon_by_ability_df
 
 
 # TODO version_group_control count
@@ -445,13 +447,13 @@ if __name__ == "__main__":
 
     conn = get_db_connection(config)
 
-    # An example section of code to see this worksp when run
+    # An example section of code to see this works when run
 
     # -- This code works
     # all_pokemon_names = get_all_pokemon_names(conn)
     # all_pokemon_types = get_all_pokemon_types(conn)
     # all_pokemon_moves = get_all_pokemon_moves(conn)
-g    # all_pokemon_abilities = get_all_pokemon_abilities(conn)
+    # all_pokemon_abilities = get_all_pokemon_abilities(conn)
 
     # print(get_all_pokemon(conn))
     # print(get_specific_pokemon(conn, 'Bulbasaur'))
@@ -462,7 +464,7 @@ g    # all_pokemon_abilities = get_all_pokemon_abilities(conn)
 
     # -- This code is testing
     # print(get_pokemon_by_move_name(conn, ["Aerial Ace", "Agility"]))
-    # print(get_pokemon_by_ability(conn, "Overgrow"))
+    print(get_pokemon_by_ability(conn, "Overgrow"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
 
