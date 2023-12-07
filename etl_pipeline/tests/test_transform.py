@@ -1,7 +1,7 @@
 """Testing file for transform"""
 
-from transform import set_abilities_language, filter_flavor_text_entries
-from transform import filter_effect_entries, filter_name_entries
+from etl_pipeline.etl.transform import set_abilities_language, filter_flavor_text_entries
+from etl_pipeline.etl.transform import filter_effect_entries, filter_name_entries
 
 
 def test_filter_flavor_text_entries_version_group_changed_to_string(mock_flavor_text_entries_three_en_two_fr):

@@ -3,11 +3,11 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from extract import api_request_data, get_pokemon_count, get_pokemon_urls
-from extract import extract_single_pokemon
+from etl_pipeline.etl.extract import api_request_data, get_pokemon_count, get_pokemon_urls
+from etl_pipeline.etl.extract import extract_single_pokemon
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_api_request_data_404_exception_raised(mock_requests):
     """Tests exception raised for a 404 status code api_request_data"""
 
@@ -19,7 +19,7 @@ def test_api_request_data_404_exception_raised(mock_requests):
         api_request_data("fake_url")
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_api_request_data_400_exception_raised(mock_requests):
     """Tests exception raised for 400 status code in api_request_data"""
 
@@ -31,7 +31,7 @@ def test_api_request_data_400_exception_raised(mock_requests):
         api_request_data("fake_url")
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_api_request_data_200_status_code_returns_data(mock_requests, mock_api_json_return_data):
     """Tests data is returned given a 200 status code in api_request_data"""
 
@@ -45,7 +45,7 @@ def test_api_request_data_200_status_code_returns_data(mock_requests, mock_api_j
     assert result == mock_api_json_return_data
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_count_successful_status_code_returns_int(mock_requests, mock_api_json_return_data):
     """Tests integer is returned given a successful status code"""
 
@@ -59,7 +59,7 @@ def test_get_pokemon_count_successful_status_code_returns_int(mock_requests, moc
     assert isinstance(result, int)
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_count_successful_status_code_returns_correct_int(mock_requests, mock_api_json_return_data):
     """Tests correct integer is returned given a successful status code"""
 
@@ -73,7 +73,7 @@ def test_get_pokemon_count_successful_status_code_returns_correct_int(mock_reque
     assert result == 500
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_no_count_key_raises_exception(mock_requests, mock_api_json_return_data_no_count_key):
     """Tests exception is raised if 'count' key isn't present in response data"""
 
@@ -86,7 +86,7 @@ def test_get_pokemon_no_count_key_raises_exception(mock_requests, mock_api_json_
         get_pokemon_count()
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_count_as_string_works(mock_requests, mock_api_json_return_data_all_strings):
     """Tests if count value is a string, it will be converted to an int"""
 
@@ -100,7 +100,7 @@ def test_get_pokemon_count_as_string_works(mock_requests, mock_api_json_return_d
     assert result == 500
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_urls_status_code_200_returns_list(mock_requests, mock_api_json_return_data):
     """Tests base case for get_pokemon_urls with status code 200 (returns list)"""
 
@@ -114,7 +114,7 @@ def test_get_pokemon_urls_status_code_200_returns_list(mock_requests, mock_api_j
     assert isinstance(result, list)
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_urls_status_code_200_returns_correct_list(mock_requests, mock_api_json_return_data):
     """Tests base case for get_pokemon_urls with status code 200 (returns the correct list)"""
 
@@ -128,7 +128,7 @@ def test_get_pokemon_urls_status_code_200_returns_correct_list(mock_requests, mo
     assert result == [x["url"] for x in mock_api_json_return_data["results"]]
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_urls_status_code_400_raises_exception(mock_requests, mock_api_json_return_data):
     """Tests exception raised for 400 status code response in get_pokemon_urls"""
 
@@ -141,7 +141,7 @@ def test_get_pokemon_urls_status_code_400_raises_exception(mock_requests, mock_a
         get_pokemon_urls(1234)
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_get_pokemon_urls_status_code_404_raises_exception(mock_requests, mock_api_json_return_data):
     """Tests exception raised for 404 status code response in get_pokemon_urls"""
 
@@ -154,7 +154,7 @@ def test_get_pokemon_urls_status_code_404_raises_exception(mock_requests, mock_a
         get_pokemon_urls(1234)
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_extract_single_pokemon_status_code_200_base_case(mock_requests, mock_api_json_return_data_single_pokemon):
     """Tests base case for 200 status code in function extract_single_pokemon"""
 
@@ -168,7 +168,7 @@ def test_extract_single_pokemon_status_code_200_base_case(mock_requests, mock_ap
     assert isinstance(mock_api_json_return_data_single_pokemon, dict)
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_extract_single_pokemon_status_code_400_raises_exception(mock_requests, mock_api_json_return_data_single_pokemon):
     """Tests exception is raised for 400 status code in function extract_single_pokemon"""
 
@@ -181,7 +181,7 @@ def test_extract_single_pokemon_status_code_400_raises_exception(mock_requests, 
         extract_single_pokemon("mock_url")
 
 
-@patch("extract.requests")
+@patch("etl_pipeline.etl.extract.requests")
 def test_extract_single_pokemon_status_code_404_raises_exception(mock_requests, mock_api_json_return_data_single_pokemon):
     """Tests exception is raised for 404 status code in function extract_single_pokemon"""
 
