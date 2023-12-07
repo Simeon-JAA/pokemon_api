@@ -259,8 +259,8 @@ def get_pokemon_by_single_move_name(db_conn: connection, pokemon_move: str) -> D
     """Return data frame of pokemon that are associated with the move"""
 
     all_pokemon_moves = get_all_pokemon_moves(db_conn)
+    pokemon_move = pokemon_move.lower().strip()
 
-    pokemon_move = pokemon_move.lower()
     if pokemon_move not in all_pokemon_moves:
         raise ValueError(
             f"Error: Pokemon move ({pokemon_move.title()}) is not in the database!")
@@ -305,14 +305,13 @@ def get_pokemon_by_multiple_move_names(db_conn: connection, pokemon_moves: list[
 
     # This query works with if the pokemon contains move 1 OR move 2
     cur.execute("""SELECT p.pokemon_id, pokemon_name,
-            STRING_AGG (move_name, ', ' ORDER BY move_name) AS move_list,
-            STRING_TO_ARRAY(STRING_AGG (LOWER(move_name), ', '), ', ') AS example
+            STRING_AGG (move_name, ', ' ORDER BY move_name) AS move_list
             FROM pokemon AS p
             JOIN pokemon_move AS pm
             ON p.pokemon_id = pm.pokemon_id
             GROUP BY p.pokemon_id
             HAVING STRING_TO_ARRAY(STRING_AGG (LOWER(move_name), ', '), ', ') @> %s
-            ORDER BY p.pokemon_id;""", [list(pokemon_moves)])
+            ORDER BY p.pokemon_id;""", [pokemon_moves])
 
     pokemon_by_moves = cur.fetchall()
     cur.close()
@@ -321,60 +320,15 @@ def get_pokemon_by_multiple_move_names(db_conn: connection, pokemon_moves: list[
     return pokemon_by_moves_df
 
 
-# TODO finish sql query
-def get_pokemon_specific_types_count(db_conn: connection, pokemon_types_input: list[str]) -> DataFrame:
-    """Returns the count of specified_types in the db"""
-
-    all_pokemon_types = get_all_pokemon_types(db_conn)
-
-    for p_type in pokemon_types_input:
-
-        if p_type.lower() not in all_pokemon_types:
-
-            raise ValueError(
-                f"Error: {p_type.capitalize()} is not in the database!")
-
-    cur = db_conn.cursor(cursor_factory=RealDictCursor)
-
-    try:
-        cur.execute("""SELECT pokemon_type AS type,
-                    COUNT(pokemon_type) AS count
-                    FROM pokemon_types
-                    WHERE pokemon_type IN (%s)
-                    GROUP BY type;""",
-                    [", ".join(pokemon_types_input)])
-
-    except (ConnectionError, ConnectionRefusedError) as conn_err:
-        conn_err("Error communicating with the database!")
-
-    pokemon_data = cur.fetchall()
-
-    return pd.DataFrame(pokemon_data)
-
-
-# If (type_1, type_2, type_3) and input is (type_1, type_3) pokemon will not show up
-# TODO fix this
-def get_pokemon_by_type(db_conn: connection, pokemon_type: str | list[str]) -> DataFrame:
+def get_pokemon_by_single_type(db_conn: connection, pokemon_type: str) -> DataFrame:
     """Returns all pokemon of a specific type"""
 
     all_pokemon_types = get_all_pokemon_types(db_conn)
+    pokemon_type = pokemon_type.lower().strip()
 
-    if isinstance(pokemon_type, str):
-        if pokemon_type.lower() not in all_pokemon_types:
-            raise ValueError("Error: Pokemon type not in database!")
-
-    elif isinstance(pokemon_type, list):
-        for p_type in pokemon_type:
-
-            if not isinstance(p_type, str):
-                raise TypeError(f"Error: {p_type} should be of a string type!")
-
-            if p_type.lower() not in all_pokemon_types:
-                raise ValueError(
-                    f"Error: Pokemon type {p_type} not in database!")
-
-        pokemon_type.sort()
-        pokemon_type = ", ".join(pokemon_type)
+    if pokemon_type not in all_pokemon_types:
+        raise ValueError(
+            f"Error: Pokemon type ({pokemon_type.capitalize()}) not in database!")
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
@@ -391,6 +345,42 @@ def get_pokemon_by_type(db_conn: connection, pokemon_type: str | list[str]) -> D
     pokemon_by_type_df = pd.DataFrame(pokemon_by_type)
 
     return pokemon_by_type_df
+
+
+def get_pokemon_by_multiple_types(db_conn: connection, pokemon_types: list[str]) -> DataFrame:
+    """Returns all pokemon of multiple specified types"""
+
+    all_pokemon_types = get_all_pokemon_types(db_conn)
+
+    for p_type in pokemon_types:
+
+        if not isinstance(p_type, str):
+            raise TypeError(f"Error: {p_type} should be of a string type!")
+
+        if p_type.lower() not in all_pokemon_types:
+            raise ValueError(
+                f"Error: Pokemon type ({p_type}) not in database!")
+
+    pokemon_types.sort()
+    pokemon_types = list(
+        map(lambda p_type: p_type.lower().strip(), pokemon_types))
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT p.pokemon_id, pokemon_name,
+                STRING_AGG(pokemon_type, ', ' ORDER BY pokemon_type) AS pokemon_types
+                FROM pokemon AS p
+                JOIN pokemon_types AS pt
+                ON p.pokemon_id = pt.pokemon_id
+                GROUP BY p.pokemon_id
+                HAVING STRING_TO_ARRAY(STRING_AGG (LOWER(pokemon_type), ', '), ', ') @> %s;""",
+                [pokemon_types])
+
+    pokemon_by_types = cur.fetchall()
+
+    pokemon_by_types_df = pd.DataFrame(pokemon_by_types)
+
+    return pokemon_by_types_df
 
 
 # If (ability_1, ability_2, ability_3) and input is (ability_1, ability_3) pokemon will not show up
@@ -434,6 +424,37 @@ def get_pokemon_by_ability(db_conn: connection, pokemon_ability: str | list[str]
     pokemon_by_ability_df = pd.DataFrame(pokemon_by_ability)
 
     return pokemon_by_ability_df
+
+
+# TODO finish sql query
+def get_pokemon_specific_types_count(db_conn: connection, pokemon_types_input: list[str]) -> DataFrame:
+    """Returns the count of specified_types in the db"""
+
+    all_pokemon_types = get_all_pokemon_types(db_conn)
+
+    for p_type in pokemon_types_input:
+
+        if p_type.lower() not in all_pokemon_types:
+
+            raise ValueError(
+                f"Error: {p_type.capitalize()} is not in the database!")
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    try:
+        cur.execute("""SELECT pokemon_type AS type,
+                    COUNT(pokemon_type) AS count
+                    FROM pokemon_types
+                    WHERE pokemon_type IN (%s)
+                    GROUP BY type;""",
+                    [", ".join(pokemon_types_input)])
+
+    except (ConnectionError, ConnectionRefusedError) as conn_err:
+        conn_err("Error communicating with the database!")
+
+    pokemon_data = cur.fetchall()
+
+    return pd.DataFrame(pokemon_data)
 
 
 # TODO version_group_control count
@@ -482,11 +503,12 @@ if __name__ == "__main__":
     # print(get_specific_pokemon_count(conn, 'bulbasaur'))
     # print(get_all_pokemon_count(conn))
     # print(get_pokemon_by_single_move_name(conn, "splash"))
+    # print(get_pokemon_by_single_type(conn, "ground "))
+    # print(get_pokemon_by_multiple_types(conn, ["ground", "poison"]))
 
     # -- This code is testing
-    # print(get_pokemon_by_type(conn, ["rock", "fire"]))
     # print(get_all_pokemon_move_names(conn))
-    print(get_pokemon_by_multiple_move_names(conn, ["Aerial Ace", "Agility"]))
+    # print(get_pokemon_by_multiple_move_names(conn, ["Aerial Ace", "Agility"]))
     # print(get_pokemon_by_ability(conn, "Overgrow"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
