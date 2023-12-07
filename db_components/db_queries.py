@@ -284,6 +284,7 @@ def get_pokemon_by_single_move_name(db_conn: connection, pokemon_move: str) -> D
     return pokemon_by_move_df
 
 
+# TODO check if this query is an OR/AND quer
 def get_pokemon_by_multiple_move_names(db_conn: connection, pokemon_moves: list[str]) -> DataFrame:
     """Return data frame of pokemon that are associated with the move"""
 
@@ -303,7 +304,6 @@ def get_pokemon_by_multiple_move_names(db_conn: connection, pokemon_moves: list[
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    # This query works with if the pokemon contains move 1 OR move 2
     cur.execute("""SELECT p.pokemon_id, pokemon_name,
             STRING_AGG (move_name, ', ' ORDER BY move_name) AS move_list
             FROM pokemon AS p
@@ -383,31 +383,52 @@ def get_pokemon_by_multiple_types(db_conn: connection, pokemon_types: list[str])
     return pokemon_by_types_df
 
 
-# If (ability_1, ability_2, ability_3) and input is (ability_1, ability_3) pokemon will not show up
-# TODO fix this
-def get_pokemon_by_ability(db_conn: connection, pokemon_ability: str | list[str]) -> DataFrame:
-    """Returns all pokemon with relation to listed abilities (or ability)"""
+def get_pokemon_by_single_ability(db_conn: connection, pokemon_ability: str) -> DataFrame:
+    """Returns all pokemon that have listed ability in their roster"""
+
+    all_pokemon_abilities = get_all_pokemon_abilities(db_conn)
+    pokemon_ability = pokemon_ability.lower().strip()
+
+    if pokemon_ability.lower() not in all_pokemon_abilities:
+        raise ValueError(
+            f"Error: Pokemon ability ({pokemon_ability.title()}) not in database!")
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT p.pokemon_id, pokemon_name,
+                STRING_AGG (ability_name, ', ' ORDER BY ability_name) AS all_abilities
+                FROM pokemon AS p
+                JOIN pokemon_ability AS pa
+                ON p.pokemon_id = pa.pokemon_id
+                GROUP BY p.pokemon_id
+                HAVING STRING_AGG (ability_name, ', ' ORDER BY ability_name) ILIKE %s;""",
+                [f"%{pokemon_ability.title()}"])
+
+    pokemon_by_ability = cur.fetchall()
+    cur.close()
+    pokemon_by_ability_df = pd.DataFrame(pokemon_by_ability)
+
+    return pokemon_by_ability_df
+
+
+def get_pokemon_by_multiple_abilities(db_conn: connection, pokemon_ability: str | list[str]) -> DataFrame:
+    """Returns all pokemon with listed abilities in their roster"""
 
     all_pokemon_abilities = get_all_pokemon_abilities(db_conn)
 
-    if isinstance(pokemon_ability, str):
-        if pokemon_ability.lower() not in all_pokemon_abilities:
+    for p_ability in pokemon_ability:
+
+        if not isinstance(p_ability, str):
+            raise TypeError(
+                f"Error: {p_ability} should be of a string type!")
+
+        if p_ability.lower() not in all_pokemon_abilities:
             raise ValueError(
-                f"Error: Pokemon ability ({pokemon_ability.title()}) not in database!")
+                f"Error: Pokemon type {p_ability.title()} not in database!")
 
-    elif isinstance(pokemon_ability, list):
-        for p_ability in pokemon_ability:
-
-            if not isinstance(p_ability, str):
-                raise TypeError(
-                    f"Error: {p_ability} should be of a string type!")
-
-            if p_ability.lower() not in all_pokemon_abilities:
-                raise ValueError(
-                    f"Error: Pokemon type {p_ability.title()} not in database!")
-
-        pokemon_ability.sort()
-        pokemon_ability = ", ".join(pokemon_ability)
+    pokemon_ability.sort()
+    pokemon_ability = list(
+        map(lambda p_ability: p_ability.lower().strip(), pokemon_ability))
 
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
@@ -417,13 +438,14 @@ def get_pokemon_by_ability(db_conn: connection, pokemon_ability: str | list[str]
                 JOIN pokemon_ability AS pa
                 ON p.pokemon_id = pa.pokemon_id
                 GROUP BY p.pokemon_id
-                HAVING STRING_AGG(LOWER(pa.ability_name), ', ' ORDER BY ability_name) ILIKE %s;""",
-                [f"%{pokemon_ability.title()}%"])
+                HAVING STRING_TO_ARRAY(STRING_AGG(LOWER(pa.ability_name), ', '), ', ') @> %s;""",
+                [pokemon_ability])
 
-    pokemon_by_ability = cur.fetchall()
-    pokemon_by_ability_df = pd.DataFrame(pokemon_by_ability)
+    pokemon_by_abilities = cur.fetchall()
+    cur.close()
+    pokemon_by_abilities_df = pd.DataFrame(pokemon_by_abilities)
 
-    return pokemon_by_ability_df
+    return pokemon_by_abilities_df
 
 
 # TODO finish sql query
@@ -505,11 +527,12 @@ if __name__ == "__main__":
     # print(get_pokemon_by_single_move_name(conn, "splash"))
     # print(get_pokemon_by_single_type(conn, "ground "))
     # print(get_pokemon_by_multiple_types(conn, ["ground", "poison"]))
+    # print(get_pokemon_by_single_ability(conn, "overgrow"))
+    # print(get_pokemon_by_multiple_abilities(conn, ["Leaf guard", "Overgrow"]))
 
     # -- This code is testing
     # print(get_all_pokemon_move_names(conn))
     # print(get_pokemon_by_multiple_move_names(conn, ["Aerial Ace", "Agility"]))
-    # print(get_pokemon_by_ability(conn, "Overgrow"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
 
