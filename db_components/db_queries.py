@@ -255,30 +255,15 @@ def get_all_pokemon_move_names(db_conn: connection) -> DataFrame:
     return pokemon_data_df
 
 
-# If (move_1, move_2, move_3) and input is (move_1, move_3) pokemon will not show up
-# TODO fix this
-def get_pokemon_by_move_name(db_conn: connection, pokemon_move: str | list[str]) -> DataFrame:
+def get_pokemon_by_single_move_name(db_conn: connection, pokemon_move: str) -> DataFrame:
     """Return data frame of pokemon that are associated with the move"""
 
     all_pokemon_moves = get_all_pokemon_moves(db_conn)
 
-    if isinstance(pokemon_move, str):
-        if pokemon_move.lower() not in all_pokemon_moves:
-            raise ValueError(
-                f"Error: Pokemon move ({pokemon_move.title()}) is not in the database!")
-
-    elif isinstance(pokemon_move, list):
-        for p_move in pokemon_move:
-
-            if not isinstance(p_move, str):
-                raise TypeError(f"Error: {p_move} should be a string!")
-
-            if p_move.lower() not in all_pokemon_moves:
-                raise ValueError(
-                    f"Error: {p_move.capitalize()} not in database!")
-
-        pokemon_move.sort()
-        pokemon_move = ", ".join(pokemon_move)
+    pokemon_move = pokemon_move.lower()
+    if pokemon_move not in all_pokemon_moves:
+        raise ValueError(
+            f"Error: Pokemon move ({pokemon_move.title()}) is not in the database!")
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -297,6 +282,43 @@ def get_pokemon_by_move_name(db_conn: connection, pokemon_move: str | list[str])
     pokemon_by_move_df = pd.DataFrame(pokemon_by_move)
 
     return pokemon_by_move_df
+
+
+def get_pokemon_by_multiple_move_names(db_conn: connection, pokemon_moves: list[str]) -> DataFrame:
+    """Return data frame of pokemon that are associated with the move"""
+
+    all_pokemon_moves = get_all_pokemon_moves(db_conn)
+
+    for p_move in pokemon_moves:
+
+        if not isinstance(p_move, str):
+            raise TypeError(f"Error: {p_move} should be a string!")
+
+        if p_move.lower() not in all_pokemon_moves:
+            raise ValueError(
+                f"Error: {p_move.capitalize()} not in database!")
+
+    pokemon_moves.sort()
+    pokemon_moves = list(map(lambda p_move: p_move.lower(), pokemon_moves))
+
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    # This query works with if the pokemon contains move 1 OR move 2
+    cur.execute("""SELECT p.pokemon_id, pokemon_name,
+            STRING_AGG (move_name, ', ' ORDER BY move_name) AS move_list,
+            STRING_TO_ARRAY(STRING_AGG (LOWER(move_name), ', '), ', ') AS example
+            FROM pokemon AS p
+            JOIN pokemon_move AS pm
+            ON p.pokemon_id = pm.pokemon_id
+            GROUP BY p.pokemon_id
+            HAVING STRING_TO_ARRAY(STRING_AGG (LOWER(move_name), ', '), ', ') @> %s
+            ORDER BY p.pokemon_id;""", [list(pokemon_moves)])
+
+    pokemon_by_moves = cur.fetchall()
+    cur.close()
+    pokemon_by_moves_df = pd.DataFrame(pokemon_by_moves)
+
+    return pokemon_by_moves_df
 
 
 # TODO finish sql query
@@ -459,11 +481,12 @@ if __name__ == "__main__":
     # print(get_specific_pokemon(conn, 'Bulbasaur'))
     # print(get_specific_pokemon_count(conn, 'bulbasaur'))
     # print(get_all_pokemon_count(conn))
+    # print(get_pokemon_by_single_move_name(conn, "splash"))
 
     # -- This code is testing
     # print(get_pokemon_by_type(conn, ["rock", "fire"]))
     # print(get_all_pokemon_move_names(conn))
-    # print(get_pokemon_by_move_name(conn, ["Aerial Ace", "Agility"]))
+    print(get_pokemon_by_multiple_move_names(conn, ["Aerial Ace", "Agility"]))
     # print(get_pokemon_by_ability(conn, "Overgrow"))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
