@@ -448,62 +448,6 @@ def get_pokemon_by_multiple_abilities(db_conn: connection, pokemon_ability: str 
     return pokemon_by_abilities_df
 
 
-# TODO finish sql query
-def get_pokemon_specific_types_count(db_conn: connection, pokemon_types_input: list[str]) -> DataFrame:
-    """Returns the count of specified_types in the db"""
-
-    all_pokemon_types = get_all_pokemon_types(db_conn)
-
-    for p_type in pokemon_types_input:
-
-        if p_type.lower() not in all_pokemon_types:
-
-            raise ValueError(
-                f"Error: {p_type.capitalize()} is not in the database!")
-
-    cur = db_conn.cursor(cursor_factory=RealDictCursor)
-
-    try:
-        cur.execute("""SELECT pokemon_type AS type,
-                    COUNT(pokemon_type) AS count
-                    FROM pokemon_types
-                    WHERE pokemon_type IN (%s)
-                    GROUP BY type;""",
-                    [", ".join(pokemon_types_input)])
-
-    except (ConnectionError, ConnectionRefusedError) as conn_err:
-        conn_err("Error communicating with the database!")
-
-    pokemon_data = cur.fetchall()
-
-    return pd.DataFrame(pokemon_data)
-
-
-# TODO version_group_control count
-def specific_version_control_count(db_conn: connection, move_name: str) -> DataFrame:
-    """Return version control for move specified"""
-
-    all_move_names = get_all_pokemon_moves(conn)
-
-    if move_name.lower() not in all_move_names:
-        raise (ValueError("Error: Not found in db!"))
-
-    cur = db_conn.cursor(cursor_factory=RealDictCursor)
-
-    cur.execute("""SELECT COUNT(*) 
-                FROM pokemon_move AS pm
-                LEFT JOIN pokemon_move_flavor_text AS pmft
-                ON pm.pokemon_move_id = pmft.pokemon_move_id;""")
-
-    data = cur.fetchall()
-
-    cur.close()
-
-    data_df = pd.DataFrame(data)
-    # print(data["version_group"])
-    return data_df
-
-
 if __name__ == "__main__":
 
     load_dotenv()
@@ -531,10 +475,7 @@ if __name__ == "__main__":
     # print(get_pokemon_by_multiple_abilities(conn, ["Leaf guard", "Overgrow"]))
     # print(get_pokemon_by_multiple_move_names(
     #     conn, ["Aerial Ace", "ABSORB", "AQUA jet "]))
-    print(get_all_pokemon_move_names(conn))
-
-    # -- This code is testing
+    # print(get_all_pokemon_move_names(conn))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
-    # print(version_control_count(conn))
 
     conn.close()
