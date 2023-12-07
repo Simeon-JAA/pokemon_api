@@ -241,7 +241,7 @@ def get_all_pokemon_move_names(db_conn: connection) -> DataFrame:
     cur = db_conn.cursor(cursor_factory=RealDictCursor)
 
     cur.execute("""SELECT p.pokemon_id, pokemon_name AS name, 
-                STRING_AGG (move_name, ',') AS all_move_names
+                STRING_AGG (move_name, ', ') AS all_move_names
                 FROM pokemon AS p
                 JOIN pokemon_move AS pm
                 ON pm.pokemon_id = p.pokemon_id
@@ -284,7 +284,6 @@ def get_pokemon_by_single_move_name(db_conn: connection, pokemon_move: str) -> D
     return pokemon_by_move_df
 
 
-# TODO check if this query is an OR/AND quer
 def get_pokemon_by_multiple_move_names(db_conn: connection, pokemon_moves: list[str]) -> DataFrame:
     """Return data frame of pokemon that are associated with the move"""
 
@@ -295,12 +294,13 @@ def get_pokemon_by_multiple_move_names(db_conn: connection, pokemon_moves: list[
         if not isinstance(p_move, str):
             raise TypeError(f"Error: {p_move} should be a string!")
 
-        if p_move.lower() not in all_pokemon_moves:
+        if p_move.lower().strip() not in all_pokemon_moves:
             raise ValueError(
                 f"Error: {p_move.capitalize()} not in database!")
 
     pokemon_moves.sort()
-    pokemon_moves = list(map(lambda p_move: p_move.lower(), pokemon_moves))
+    pokemon_moves = list(
+        map(lambda p_move: p_move.lower().strip(), pokemon_moves))
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -357,7 +357,7 @@ def get_pokemon_by_multiple_types(db_conn: connection, pokemon_types: list[str])
         if not isinstance(p_type, str):
             raise TypeError(f"Error: {p_type} should be of a string type!")
 
-        if p_type.lower() not in all_pokemon_types:
+        if p_type.lower().strip() not in all_pokemon_types:
             raise ValueError(
                 f"Error: Pokemon type ({p_type}) not in database!")
 
@@ -389,7 +389,7 @@ def get_pokemon_by_single_ability(db_conn: connection, pokemon_ability: str) -> 
     all_pokemon_abilities = get_all_pokemon_abilities(db_conn)
     pokemon_ability = pokemon_ability.lower().strip()
 
-    if pokemon_ability.lower() not in all_pokemon_abilities:
+    if pokemon_ability not in all_pokemon_abilities:
         raise ValueError(
             f"Error: Pokemon ability ({pokemon_ability.title()}) not in database!")
 
@@ -422,7 +422,7 @@ def get_pokemon_by_multiple_abilities(db_conn: connection, pokemon_ability: str 
             raise TypeError(
                 f"Error: {p_ability} should be of a string type!")
 
-        if p_ability.lower() not in all_pokemon_abilities:
+        if p_ability.lower().strip() not in all_pokemon_abilities:
             raise ValueError(
                 f"Error: Pokemon type {p_ability.title()} not in database!")
 
@@ -529,15 +529,12 @@ if __name__ == "__main__":
     # print(get_pokemon_by_multiple_types(conn, ["ground", "poison"]))
     # print(get_pokemon_by_single_ability(conn, "overgrow"))
     # print(get_pokemon_by_multiple_abilities(conn, ["Leaf guard", "Overgrow"]))
+    # print(get_pokemon_by_multiple_move_names(
+    #     conn, ["Aerial Ace", "ABSORB", "AQUA jet "]))
+    print(get_all_pokemon_move_names(conn))
 
     # -- This code is testing
-    # print(get_all_pokemon_move_names(conn))
-    # print(get_pokemon_by_multiple_move_names(conn, ["Aerial Ace", "Agility"]))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
     # print(version_control_count(conn))
-
-    # -- This code doesn't work
-    # print(get_pokemon_moves(conn, "bulbasaur"))
-    # pokemon_types_counts_df = get_pokemon_all_types_count(conn)
 
     conn.close()
