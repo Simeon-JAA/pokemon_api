@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch
 
 from db_queries import get_db_connection, get_specific_pokemon
-from db_queries import get_pokemon_by_single_type, specific_version_control_count
+from db_queries import get_pokemon_by_single_type
 
 
 @patch("db_queries.connect")
