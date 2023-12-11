@@ -65,3 +65,19 @@ Run data visualisation
 ```python3 main.py```
 
 
+#### db_components (bonus commands)
+
+There are some more complex datasets within db_components that I have not yet put into visualisation. At the bottom of the file, this code is commented out, but it can be uncommented and the code ran to see these Dataframes.
+
+In your code editor open db_components and uncomment the functions/datasets you would like to see the run the following commands
+
+Change to correct directory (db_components)
+
+```cd ../db_components```
+
+Run db_queries
+
+```python3 db_queriesg.py```
+
+
+
