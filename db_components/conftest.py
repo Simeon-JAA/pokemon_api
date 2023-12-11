@@ -14,3 +14,43 @@ def mock_config_environment() -> dict:
         'PORT': 'mock_port',
         'HOST': 'mock_host'
     }
+
+
+@pytest.fixture
+def mock_all_pokemon_names() -> list[str]:
+    """Returns mock of mocked pokemon names"""
+
+    return ["mock_pokemon_name_1",
+            "mock_pokemon_name_2",
+            "mock_pokemon_name_3",
+            "mock_pokemon_name_4",
+            "mock_pokemon_name_5",
+            "mock_pokemon_name_6",
+            "mock_pokemon_name_n"
+            ]
+
+
+@pytest.fixture
+def mock_all_pokemon_types() -> list[str]:
+    """Mocks and returns all types"""
+
+    return [
+        "mock_type_1",
+        "mock_type_2",
+        "mock_type_3",
+        "mock_type_4",
+        "mock_type_5",
+        "mock_type_6",
+        "mock_type_n",
+    ]
+
+@pytest.fixture
+def mock_all_pokemon_moves() -> list[str]:
+   """Mocks and returns all moves"""
+
+   return [
+      "mock_move_1",
+      "mock_move_2",
+      "mock_move_3",
+      "mock_move_n"
+    ]
