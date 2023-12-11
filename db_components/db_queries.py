@@ -448,6 +448,69 @@ def get_pokemon_by_multiple_abilities(db_conn: connection, pokemon_ability: str 
     return pokemon_by_abilities_df
 
 
+# TODO find default sql limit value
+def get_count_of_moves_known_by_pokemon(db_conn: connection, sql_limit: str = "NULL") -> DataFrame:
+    """Returns moves(limit available) with the count of pokemon that know them"""
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT DISTINCT(move_name), COUNT(pokemon_name) AS known_by
+                FROM pokemon_move AS pm
+                JOIN pokemon AS p ON pm.pokemon_id = p.pokemon_id
+                GROUP BY pm.move_name   
+                ORDER BY known_by DESC
+                LIMIT NULL;""",
+                [sql_limit])
+
+    move_count_data = cur.fetchall()
+    cur.close()
+    move_count_data_df = pd.DataFrame(move_count_data)
+
+    return move_count_data_df
+
+
+# TODO find default sql limit value
+def get_count_of_abilities_known_by_pokemon(db_conn: connection, sql_limit: str = "NULL") -> DataFrame:
+    """Returns abilities(limit available) with the count of pokemon that know them"""
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT DISTINCT(ability_name), COUNT(pokemon_name) AS known_by
+                FROM pokemon_ability AS pa
+                JOIN pokemon AS p ON pa.pokemon_id = p.pokemon_id
+                GROUP BY pa.ability_name   
+                ORDER BY known_by DESC
+                LIMIT NULL;""",
+                [sql_limit])
+
+    ability_count_data = cur.fetchall()
+    cur.close()
+    ability_count_data_df = pd.DataFrame(ability_count_data)
+
+    return ability_count_data_df
+
+
+# TODO find default sql limit value
+def get_count_of_types_of_pokemon(db_conn: connection, sql_limit: str = "NULL") -> DataFrame:
+    """Returns amount of pokemon that exist for each type"""
+
+    cur = db_conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""SELECT DISTINCT(pokemon_type), COUNT(pokemon_name) AS number_of_pokemon
+                FROM pokemon_types AS pt
+                JOIN pokemon AS p ON pt.pokemon_id = p.pokemon_id
+                GROUP BY pt.pokemon_type   
+                ORDER BY number_of_pokemon DESC
+                LIMIT NULL;""",
+                [sql_limit])
+
+    type_count_data = cur.fetchall()
+    cur.close()
+    type_count_data_df = pd.DataFrame(type_count_data)
+
+    return type_count_data_df
+
+
 if __name__ == "__main__":
 
     load_dotenv()
@@ -477,5 +540,10 @@ if __name__ == "__main__":
     #     conn, ["Aerial Ace", "ABSORB", "AQUA jet "]))
     # print(get_all_pokemon_move_names(conn))
     # print(get_specific_pokemon_moves(conn, "bulbasaur"))
+
+    # -- This code is testing
+    # print(get_count_of_moves_known_by_pokemon(conn))
+    # print(get_count_of_abilities_known_by_pokemon(conn))
+    # print(get_count_of_types_of_pokemon(conn))
 
     conn.close()
