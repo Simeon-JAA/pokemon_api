@@ -30,11 +30,11 @@ Create a virtual environment
 
 ```python3 -m venv venv```
 
-Activate the virtual environment file with the following variables for the script to work (locally in this current build)
+Activate the virtual environment file with the following command for the script to work
 
 ```source venv/bin/activate```
 
-Install requirements for the scripts to run
+Install requirements for the script to run
 
 ```pip install -r requirements```
 
@@ -47,6 +47,21 @@ Change to correct directory (ETL)
 ```cd etl_pipeline```
 
 Run Pipeline
+(the current build will add approximately 300 pokemon before crashing due to a void ability link - I will fix this in a later update but this is enough data to work with)
 
 ```python3 main.py```
+
+
+#### Streamlit (commands)
+
+For the initial data visualisation tool, I have chosen to use streamlit to host. This currently includes basic information, visualisation and some filters given the data. Commands to run the dashboard locally can be seen below!g
+
+Change to correct directory (streamlit_dashboard)
+
+```cd ../streamlit_dashboard```
+
+Run data visualisation
+
+```python3 main.py```
+
 
