@@ -30,11 +30,11 @@ Create a virtual environment
 
 ```python3 -m venv venv```
 
-Activate the virtual environment file with the following variables for the script to work (locally in this current build)
+Activate the virtual environment file with the following command for the script to work
 
 ```source venv/bin/activate```
 
-Install requirements for the scripts to run
+Install requirements for the script to run
 
 ```pip install -r requirements```
 
@@ -47,6 +47,37 @@ Change to correct directory (ETL)
 ```cd etl_pipeline```
 
 Run Pipeline
+(the current build will add approximately 300 pokemon before crashing due to a void ability link - I will fix this in a later update but this is enough data to work with)
 
 ```python3 main.py```
+
+
+#### Streamlit (commands)
+
+For the initial data visualisation tool, I have chosen to use streamlit to host. This currently includes basic information, visualisation and some filters given the data. Commands to run the dashboard locally can be seen below!g
+
+Change to correct directory (streamlit_dashboard)
+
+```cd ../streamlit_dashboard```
+
+Run data visualisation
+
+```python3 main.py```
+
+
+#### db_components (bonus commands)
+
+There are some more complex datasets within db_components that I have not yet put into visualisation. At the bottom of the file, this code is commented out, but it can be uncommented and the code ran to see these Dataframes.
+
+In your code editor open db_components and uncomment the functions/datasets you would like to see the run the following commands
+
+Change to correct directory (db_components)
+
+```cd ../db_components```
+
+Run db_queries
+
+```python3 db_queriesg.py```
+
+
 
