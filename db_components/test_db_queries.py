@@ -4,11 +4,11 @@ import pytest
 
 from unittest.mock import patch
 
-from db_components.db_queries import get_db_connection, get_specific_pokemon
-from db_components.db_queries import get_pokemon_by_single_type
+from db_queries import get_db_connection, get_specific_pokemon
+from db_queries import get_pokemon_by_single_type
 
 
-@patch("db_components.db_queries.connect")
+@patch("db_queries.connect")
 def test_connect_is_called_in_get_db_connection(mock_connect, mock_config_environment):
     """Tests that connect is called in mock_db_connection"""
 
@@ -19,7 +19,7 @@ def test_connect_is_called_in_get_db_connection(mock_connect, mock_config_enviro
     assert mock_connect.call_count == 1
 
 
-@patch("db_components.db_queries.connect")
+@patch("db_queries.connect")
 def test_connect_returns_correct_value_in_get_db_connection(mock_connect, mock_config_environment):
     """Tests that connect returns correct value called in mock_db_connection"""
 
@@ -30,7 +30,7 @@ def test_connect_returns_correct_value_in_get_db_connection(mock_connect, mock_c
     assert result == "mock_connection"
 
 
-@patch("db_components.db_queries.connect", side_effect=ConnectionError("mock connection error"))
+@patch("db_queries.connect", side_effect=ConnectionError("mock connection error"))
 def test_error_in_get_db_connection_raises_exception(mock_connect, mock_config_environment):
     """Tests exception is raised with connect returning an error  in mock_db_connection"""
 
@@ -40,8 +40,8 @@ def test_error_in_get_db_connection_raises_exception(mock_connect, mock_config_e
         get_db_connection(mock_config_environment)
 
 
-@patch("db_components.db_queries.connect")
-@patch("db_components.db_queries.get_all_pokemon_names")
+@patch("db_queries.connect")
+@patch("db_queries.get_all_pokemon_names")
 def test_exception_raised_with_pokemon_name_used_not_in_db(mock_connect, mock_get_all_pokemon_names, mock_all_pokemon_names):
     """Tests exception (value error specifically) raised when a pokemon name is used as an argument
     that is not in the database"""
@@ -53,8 +53,8 @@ def test_exception_raised_with_pokemon_name_used_not_in_db(mock_connect, mock_ge
         get_specific_pokemon(mock_connect, "not a pokemon name")
 
 
-@patch("db_components.db_queries.connect")
-@patch("db_components.db_queries.get_all_pokemon_types")
+@patch("db_queries.connect")
+@patch("db_queries.get_all_pokemon_types")
 def test_exception_raised_with_pokemon_type_used_not_in_db(mock_connect, mock_get_all_pokemon_types, mock_all_pokemon_types):
     """Tests exception raised (Value error) when type is used in argument that does not exist in the database"""
 
