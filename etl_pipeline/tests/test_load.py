@@ -2,10 +2,10 @@
 
 from unittest.mock import MagicMock, patch
 
-from load import get_db_connection
+from etl_pipeline.etl.load import get_db_connection
 
 
-@patch("load.connect")
+@patch("etl_pipeline.etl.load.connect")
 def test_connect_is_called_in_get_db_connection(mock_connect, mock_config_environment):
     """Tests function get_db_connection returns a successful connection"""
 
@@ -16,7 +16,7 @@ def test_connect_is_called_in_get_db_connection(mock_connect, mock_config_enviro
     assert mock_connect.call_count == 1
 
 
-@patch("load.connect")
+@patch("etl_pipeline.etl.load.connect")
 def test_connect_returns_the_correct_value(mock_connect, mock_config_environment):
     """Test a successful connection returns the correct value"""
 

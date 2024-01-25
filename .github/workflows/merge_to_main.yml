@@ -37,6 +37,6 @@ jobs:
     - name: Install Requirements
       run: pip3 install -r requirements.txt
     - name: Run Pytest on all etl_pipeline files
-      run: pytest etl_pipeline/test_*.py
+      run: pytest etl_pipeline/tests/test_*.py
     - name: Run Pytest on all db_components files
       run: pytest db_components/test_*.py
