@@ -1,6 +1,7 @@
 """Handles all functions loading data into database"""
 
 from os import environ
+from datetime import datetime as dt
 
 from dotenv import load_dotenv
 from psycopg2 import connect
@@ -28,6 +29,9 @@ def insert_into_pokemon_table(conn: connection, pokemon_data: dict) -> int:
     pokemon_name = pokemon_data["name"]
 
     cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    current_date = dt.now().date()
+    current_time = dt.now().time()
 
     try:
         cur.execute(f"""INSERT INTO pokemon

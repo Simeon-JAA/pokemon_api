@@ -7,6 +7,8 @@ CREATE DATABASE pokemon_api;
 CREATE TABLE pokemon (
     pokemon_id SMALLINT GENERATED ALWAYS AS IDENTITY,
     pokemon_name TEXT NOT NULL,
+    date_added DATE NOT NULL,
+    time_added TIME NOT NULL,
     in_current_team BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (pokemon_id)
 );
